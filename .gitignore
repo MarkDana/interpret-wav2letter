@@ -50,6 +50,5 @@ w2l/reduct_audio/
 wav2letter/build/
 wav2letter/fft_npy_txt/
 wav2letter/oldbuild/
-wav2letter/Dockerfile*
 
 .DS_Store
