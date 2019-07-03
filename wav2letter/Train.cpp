@@ -301,7 +301,7 @@ int main(int argc, char** argv) {
 	// ignore 5 dimensions, softmax rest dimensions
 	//auto tmpout = softmax_preOutput(af::seq(2, 27), af::span, af::span, af::span);
 	auto tmpout = addpreOutput(af::seq(2, 27), af::span, af::span, af::span);
-  auto softmax_tmpOut = fl::softmax(tmpout, 1);
+  auto softmax_tmpOut = fl::softmax(tmpout, 0);
 	//softmax_preOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
   addpreOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
 //	auto softmax_tmpOut = fl::softmax(tmpout,1);
