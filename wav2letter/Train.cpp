@@ -456,8 +456,8 @@ int main(int argc, char** argv) {
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
         auto m_L2 = af::norm(m); //double
         auto myloss = f_L2 * f_L2;
-        float m_mean=af::mean(m);
-        float m_var=af::var(m);
+        float m_mean=af::mean<float>(m);
+        float m_var=af::var<float>(m);
   
         //auto firloss = fl::MeanSquaredError();
         //auto myloss = firloss(output, preOutput);
