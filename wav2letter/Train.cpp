@@ -309,6 +309,20 @@ int main(int argc, char** argv) {
 	// auto softmax_add_preOutput = fl::matmul(zeroweight, softmax_preOutput);
   auto softmax_add_preOutput = fl::matmul(zeroweight, addpreOutput);
 
+std::ofstream tmpout("/root/w2l/CTC/tmpout.txt");
+      if(tmpout.is_open())
+      {
+  tmpout << af::toString("preOutFile_after_softmax_before_0 is:", tmpout.array());
+  tmpout.close();
+      }
+
+      std::ofstream softmax_tmpOut("/root/w2l/CTC/softmax_tmpOut.txt");
+      if(softmax_tmpOut.is_open())
+      {
+  softmax_tmpOut << af::toString("preOutFile_after_softmax_before_0 is:", softmax_tmpOut.array());
+  softmax_tmpOut.close();
+      }
+
       std::ofstream preOutFile_after_softmax_before_0("/root/w2l/CTC/preOutput_after_softmax_before_0.txt");
       if(preOutFile_after_softmax_before_0.is_open())
       {
