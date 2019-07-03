@@ -279,56 +279,30 @@ int main(int argc, char** argv) {
   preOutFile.close();
       }
 
-            std::ofstream preOutput_after_stdev_File("/root/w2l/CTC/preOutput_after_stdev.txt");
-      if(preOutput_after_stdev_File.is_open())
-      {
-  preOutput_after_stdev_File << af::toString("preOutput_after_stdev is:", addpreOutput.array());
-  preOutput_after_stdev_File.close();
-      }
-
-      af::array zerowgt = af::identity(31,31);
-      zerowgt(0, 0) = 0;
-      zerowgt(1, 1) = 0;
+      // af::array zerowgt = af::identity(31,31);
+      // zerowgt(0, 0) = 0;
+      // zerowgt(1, 1) = 0;
   
-        zerowgt(28, 28) = 0;
-        zerowgt(29, 29) = 0;
-        zerowgt(30, 30) = 0;
+      //   zerowgt(28, 28) = 0;
+      //   zerowgt(29, 29) = 0;
+      //   zerowgt(30, 30) = 0;
 
-      fl::Variable zeroweight(zerowgt, true);
+      // fl::Variable zeroweight(zerowgt, true);
 	// auto addpreOutput = fl::Variable(af::matmul(zerowgt, preOutput.array()), false);
         //fl::Variable addpreOutput(preOutput_arr,true);
         //auto softmax_preOutput = fl::softmax(addpreOutput,1);
 	// ignore 5 dimensions, softmax rest dimensions
 	//auto tmpout = softmax_preOutput(af::seq(2, 27), af::span, af::span, af::span);
 	auto tmpout = addpreOutput(af::seq(2, 27), af::span, af::span, af::span);
-  auto softmax_tmpOut = fl::softmax(tmpout, 0);
+  auto softmax_add_preOutput = fl::softmax(tmpout, 0);
 	//softmax_preOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
-  addpreOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
+  // addpreOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
 //	auto softmax_tmpOut = fl::softmax(tmpout,1);
 //	auto softmax_preOut = fl::tileAs(softmax_tmpOut, softmax_preOutput.array().dims());
 	// auto softmax_add_preOutput = fl::matmul(zeroweight, softmax_preOutput);
-  auto softmax_add_preOutput = fl::matmul(zeroweight, addpreOutput);
+  // auto softmax_add_preOutput = fl::matmul(zeroweight, addpreOutput);
 
-std::ofstream tmpoutFile("/root/w2l/CTC/tmpout.txt");
-      if(tmpoutFile.is_open())
-      {
-  tmpoutFile << af::toString("preOutFile_after_softmax_before_0 is:", tmpout.array());
-  tmpoutFile.close();
-      }
 
-      std::ofstream softmax_tmpOutFile("/root/w2l/CTC/softmax_tmpOut.txt");
-      if(softmax_tmpOutFile.is_open())
-      {
-  softmax_tmpOutFile << af::toString("preOutFile_after_softmax_before_0 is:", softmax_tmpOut.array());
-  softmax_tmpOutFile.close();
-      }
-
-      std::ofstream preOutFile_after_softmax_before_0("/root/w2l/CTC/preOutput_after_softmax_before_0.txt");
-      if(preOutFile_after_softmax_before_0.is_open())
-      {
-	preOutFile_after_softmax_before_0 << af::toString("preOutFile_after_softmax_before_0 is:", addpreOutput.array());
-	preOutFile_after_softmax_before_0.close();
-      }
 
       std::ofstream preOutFile_0("/root/w2l/CTC/preOutput_0.txt");
       if(preOutFile_0.is_open())
@@ -440,21 +414,21 @@ std::ofstream tmpoutFile("/root/w2l/CTC/tmpout.txt");
          nowOutFile<<af::toString("lastOutput is:", output_arr);
          nowOutFile.close();
       }
-        af::array wgt = af::identity(31, 31); // numClasses are 31 tokens
-	wgt(0, 0) = 0;
-        wgt(1, 1) = 0;
+ //        af::array wgt = af::identity(31, 31); // numClasses are 31 tokens
+	// wgt(0, 0) = 0;
+ //        wgt(1, 1) = 0;
        
-        wgt(28, 28) = 0;
-        wgt(29, 29) = 0;
-        wgt(30, 30) = 0;
-        auto addweight = fl::Variable(wgt, true);
+ //        wgt(28, 28) = 0;
+ //        wgt(29, 29) = 0;
+ //        wgt(30, 30) = 0;
+ //        auto addweight = fl::Variable(wgt, true);
 	      // auto addoutput = fl::matmul(addweight, output);
         //fl::Variable addoutput(output_arr,true);
 	// auto softmax_output = fl::softmax(addoutput,1);
 	auto tmp = addoutput(af::seq(2,27),af::span,af::span,af::span);
-	auto softmax_tmp = fl::softmax(tmp,1);
-	addoutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmp; 
-	auto softmax_add_output = fl::matmul(addweight, addoutput);
+	auto softmax_add_output = fl::softmax(tmp,0);
+	// addoutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmp; 
+	// auto softmax_add_output = fl::matmul(addweight, addoutput);
 
         af::sync();
 	if(i == numNoise-1)
