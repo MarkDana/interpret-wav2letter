@@ -468,8 +468,8 @@ int main(int argc, char** argv) {
         LOG(INFO) << "loss is:" << totloss;
         Yfile << totloss << std::endl;
         Mlossfile << std::log(m_L2 * m_L2) << std::endl;
-        Mmeanfile << af::mean(m).array()<<std::endl;
-        Mvarfile << af::var(m).array()<<std::endl;
+        Mmeanfile << fl::mean(m).array()<<std::endl;
+        Mvarfile << fl::var(m).array()<<std::endl;
         mylossfile << myloss.scalar<float>()<<std::endl;
 
 
