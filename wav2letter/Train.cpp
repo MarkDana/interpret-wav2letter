@@ -207,7 +207,7 @@ int main(int argc, char** argv) {
 
       //the size of trainset is just 1.
       auto pre_sample = trainset->get(0); //make noises for one audio sample
-      int numNoise = 50000; //make 1000 noise sub-samples for the audio sample
+      int numNoise = 1; //make 1000 noise sub-samples for the audio sample
       std::vector<float> Yloss(numNoise); //loss written into Yloss
       std::ofstream Yfile("/root/w2l/CTC/loss.txt", std::ios::out);
       //std::vector<float> firGradnorm(numNoise);
@@ -309,11 +309,18 @@ int main(int argc, char** argv) {
 	// auto softmax_add_preOutput = fl::matmul(zeroweight, softmax_preOutput);
   auto softmax_add_preOutput = fl::matmul(zeroweight, addpreOutput);
 
+      std::ofstream preOutFile_after_softmax_before_0("/root/w2l/CTC/preOutput_after_softmax_before_0.txt");
+      if(preOutFile_after_softmax_before_0.is_open())
+      {
+	preOutFile_after_softmax_before_0 << af::toString("preOutFile_after_softmax_before_0 is:", addpreOutput.array());
+	preOutFile_after_softmax_before_0.close();
+      }
+
       std::ofstream preOutFile_0("/root/w2l/CTC/preOutput_0.txt");
       if(preOutFile_0.is_open())
       {
-	preOutFile_0 << af::toString("preOutput_0 is:", softmax_add_preOutput.array());
-	preOutFile_0.close();
+  preOutFile_0 << af::toString("preOutput_0 is:", softmax_add_preOutput.array());
+  preOutFile_0.close();
       }
       
       
