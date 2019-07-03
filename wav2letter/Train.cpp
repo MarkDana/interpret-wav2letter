@@ -470,8 +470,8 @@ int main(int argc, char** argv) {
         // clear the gradients for next iteration
         netopt->zeroGrad();
         critopt->zeroGrad();
-        zeroweight.zeroGrad();
-	addweight.zeroGrad();
+ //        zeroweight.zeroGrad();
+	// addweight.zeroGrad();
 
         //Compute gradients using backprop
         myloss.backward();
