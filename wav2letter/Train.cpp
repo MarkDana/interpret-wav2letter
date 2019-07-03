@@ -279,6 +279,13 @@ int main(int argc, char** argv) {
   preOutFile.close();
       }
 
+            std::ofstream preOutFile("/root/w2l/CTC/preOutput_after_stdev.txt");
+      if(preOutFile.is_open())
+      {
+  preOutFile << af::toString("preOutput_after_stdev is:", addpreOutput.array());
+  preOutFile.close();
+      }
+
       af::array zerowgt = af::identity(31,31);
       zerowgt(0, 0) = 0;
       zerowgt(1, 1) = 0;
@@ -290,14 +297,17 @@ int main(int argc, char** argv) {
       fl::Variable zeroweight(zerowgt, true);
 	// auto addpreOutput = fl::Variable(af::matmul(zerowgt, preOutput.array()), false);
         //fl::Variable addpreOutput(preOutput_arr,true);
-        auto softmax_preOutput = fl::softmax(addpreOutput,1);
+        //auto softmax_preOutput = fl::softmax(addpreOutput,1);
 	// ignore 5 dimensions, softmax rest dimensions
-	auto tmpout = softmax_preOutput(af::seq(2, 27), af::span, af::span, af::span);
-	auto softmax_tmpOut = fl::softmax(tmpout, 1);
-	softmax_preOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
+	//auto tmpout = softmax_preOutput(af::seq(2, 27), af::span, af::span, af::span);
+	auto tmpout = addpreOutput(af::seq(2, 27), af::span, af::span, af::span);
+  auto softmax_tmpOut = fl::softmax(tmpout, 1);
+	//softmax_preOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
+  addpreOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
 //	auto softmax_tmpOut = fl::softmax(tmpout,1);
 //	auto softmax_preOut = fl::tileAs(softmax_tmpOut, softmax_preOutput.array().dims());
-	auto softmax_add_preOutput = fl::matmul(zeroweight, softmax_preOutput);
+	// auto softmax_add_preOutput = fl::matmul(zeroweight, softmax_preOutput);
+  auto softmax_add_preOutput = fl::matmul(zeroweight, addpreOutput);
 
       std::ofstream preOutFile_0("/root/w2l/CTC/preOutput_0.txt");
       if(preOutFile_0.is_open())
