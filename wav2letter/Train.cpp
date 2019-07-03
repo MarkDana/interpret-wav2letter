@@ -210,6 +210,13 @@ int main(int argc, char** argv) {
       int numNoise = 50000; //make 1000 noise sub-samples for the audio sample
       std::vector<float> Yloss(numNoise); //loss written into Yloss
       std::ofstream Yfile("/root/w2l/CTC/loss.txt", std::ios::out);
+      std::ofstream Mmeanfile("/root/w2l/CTC/m_mean.txt", std::ios::out);
+      std::ofstream Mvarfile("/root/w2l/CTC/m_var.txt", std::ios::out);
+      std::ofstream Mlossfile("/root/w2l/CTC/m_loss.txt", std::ios::out);
+      std::ofstream mylossfile("/root/w2l/CTC/myloss.txt", std::ios::out);
+
+      
+      
       //std::vector<float> firGradnorm(numNoise);
       //std::ofstream firGradnormFile("/root/w2l/aboutM/firGradnorm.txt", std::ios::out);
       //std::vector<float> secGradnorm(numNoise);
@@ -440,7 +447,7 @@ int main(int argc, char** argv) {
 	       nowOutFile_0<<af::toString("lastOutput_0 is:", softmax_add_output.array());
 	       nowOutFile_0.close();
 	    }
-        }
+  }
         
         //LOG(INFO) << "network forward output dims is "<< output.array().dims();
         //LOG(INFO) << "load rawEmission preOutput dims is :" << preOutput.array().dims() ;
@@ -460,6 +467,11 @@ int main(int argc, char** argv) {
         LOG(INFO) << "loss - logm is :" << std::log(m_L2 * m_L2);
         LOG(INFO) << "loss is:" << totloss;
         Yfile << totloss << std::endl;
+        Mlossfile << std::log(m_L2 * m_L2) << std::endl;
+        Mmeanfile << af::mean(m)<<std::endl;
+        Mvarfile << af::var(m)<<std::endl;
+        mylossfile << myloss.scalar<float>()<<std::endl;
+
 
         af::sync();
        
