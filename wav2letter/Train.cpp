@@ -279,11 +279,11 @@ int main(int argc, char** argv) {
   preOutFile.close();
       }
 
-            std::ofstream preOutFile("/root/w2l/CTC/preOutput_after_stdev.txt");
-      if(preOutFile.is_open())
+            std::ofstream preOutput_after_stdev_File("/root/w2l/CTC/preOutput_after_stdev.txt");
+      if(preOutput_after_stdev_File.is_open())
       {
-  preOutFile << af::toString("preOutput_after_stdev is:", addpreOutput.array());
-  preOutFile.close();
+  preOutput_after_stdev_File << af::toString("preOutput_after_stdev is:", addpreOutput.array());
+  preOutput_after_stdev_File.close();
       }
 
       af::array zerowgt = af::identity(31,31);
