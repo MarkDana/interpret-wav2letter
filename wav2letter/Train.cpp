@@ -456,6 +456,9 @@ int main(int argc, char** argv) {
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
         auto m_L2 = af::norm(m); //double
         auto myloss = f_L2 * f_L2;
+        float m_mean=af::mean(m);
+        float m_var=af::var(m);
+  
         //auto firloss = fl::MeanSquaredError();
         //auto myloss = firloss(output, preOutput);
 
@@ -468,8 +471,8 @@ int main(int argc, char** argv) {
         LOG(INFO) << "loss is:" << totloss;
         Yfile << totloss << std::endl;
         Mlossfile << std::log(m_L2 * m_L2) << std::endl;
-        Mmeanfile << fl::mean(m).array()<<std::endl;
-        Mvarfile << fl::var(m).array()<<std::endl;
+        Mmeanfile << m_mean<<std::endl;
+        Mvarfile << m_var<<std::endl;
         mylossfile << myloss.scalar<float>()<<std::endl;
 
 
