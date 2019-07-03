@@ -429,11 +429,11 @@ int main(int argc, char** argv) {
         auto addweight = fl::Variable(wgt, true);
 	      // auto addoutput = fl::matmul(addweight, output);
         //fl::Variable addoutput(output_arr,true);
-	auto softmax_output = fl::softmax(addoutput,1);
-	auto tmp = softmax_output(af::seq(2,27),af::span,af::span,af::span);
+	// auto softmax_output = fl::softmax(addoutput,1);
+	auto tmp = addoutput(af::seq(2,27),af::span,af::span,af::span);
 	auto softmax_tmp = fl::softmax(tmp,1);
-	softmax_output(af::seq(2,27),af::span,af::span,af::span)=softmax_tmp; 
-	auto softmax_add_output = fl::matmul(addweight, softmax_output);
+	addoutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmp; 
+	auto softmax_add_output = fl::matmul(addweight, addoutput);
 
         af::sync();
 	if(i == numNoise-1)
