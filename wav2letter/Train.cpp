@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
       //auto m = af::constant(0.1,noiseDims);
       //auto m=fl::normal(noiseDims,0.002,0.1).array();
       // float mylr = 0.001;
-      float mylr = 0.5;
+      float mylr = 1.0;
 
       //the previous network's output f*
       fl::Variable preOutput; 
