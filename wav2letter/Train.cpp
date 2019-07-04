@@ -207,7 +207,7 @@ int main(int argc, char** argv) {
 
       //the size of trainset is just 1.
       auto pre_sample = trainset->get(0); //make noises for one audio sample
-      int numNoise = 100000; //make 1000 noise sub-samples for the audio sample
+      int numNoise = 5000; //make 1000 noise sub-samples for the audio sample
       std::vector<float> Yloss(numNoise); //loss written into Yloss
       std::ofstream Yfile("/root/w2l/CTC/loss.txt", std::ios::out);
       std::ofstream Mmeanfile("/root/w2l/CTC/m_mean.txt", std::ios::out);
@@ -451,7 +451,7 @@ int main(int argc, char** argv) {
         
         //LOG(INFO) << "network forward output dims is "<< output.array().dims();
         //LOG(INFO) << "load rawEmission preOutput dims is :" << preOutput.array().dims() ;
-	float lambda = 10;
+	float lambda = 0.1;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
         auto m_L2 = af::norm(m); //double
