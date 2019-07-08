@@ -448,6 +448,20 @@ int main(int argc, char** argv) {
 	       nowOutFile_0.close();
 	    }
   }
+
+  if(i%1000 == 0)
+  {
+      char outdir[80];
+
+      sprintf(outdir, "/root/w2l/CTC/music_mask_%d.txt", i);
+  
+      std::ofstream fft_mask_now(outdir);
+      if(fft_mask_now.is_open())
+      {
+         fft_mask_now<<af::toString("mask music is:", rawinput.array());
+         fft_mask_now.close();
+      }
+  }
         
         //LOG(INFO) << "network forward output dims is "<< output.array().dims();
         //LOG(INFO) << "load rawEmission preOutput dims is :" << preOutput.array().dims() ;
@@ -501,7 +515,7 @@ int main(int argc, char** argv) {
 	        outputGradFile << af::toString("output Grad is:", output.grad().array());
                 outputGradFile.close();
 	    }
-        }
+  }
 
         if (FLAGS_maxgradnorm > 0) {
           auto params = ntwrk->params();
