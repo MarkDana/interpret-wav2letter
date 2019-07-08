@@ -253,6 +253,11 @@ int main(int argc, char** argv) {
         preinput << af::toString("pre_fft values:",pre_sample[kFftIdx]);
         preinput.close();
       }
+      //Notice:here prefft is 2K*T
+      //Notice:but maskMusic is K*T
+
+
+
       //using network to generate preOutput 
       auto prefinalinput=pre_sample[kInputIdx];
       const float inputmean=af::mean<float>(pre_sample[kInputIdx]);
@@ -347,6 +352,9 @@ int main(int argc, char** argv) {
               epsfile.close();
 	   }
 	}
+
+  
+
         ///////////////////////////////////////////////////////////////////////////////////////////////
 	auto rawinput = pre_sample[kFftIdx];
 
@@ -417,6 +425,22 @@ int main(int argc, char** argv) {
               absinput_after_blur(i,j,af::span)+=Z_add(p,j,i);
             }
           } 
+        }
+
+        //Notice:here prefft is 2K*T
+        //Notice:but maskMusic is K*T, and angle remains still
+        if(i%1000 == 0)
+        {
+            char outdir[80];
+
+            sprintf(outdir, "/root/w2l/CTC/music_mask_%d.txt", i);
+        
+            std::ofstream fft_mask_now(outdir);
+            if(fft_mask_now.is_open())
+            {
+               fft_mask_now<<af::toString("mask music is:", absinput_after_blur.array());
+               fft_mask_now.close();
+            }
         }
 
 
