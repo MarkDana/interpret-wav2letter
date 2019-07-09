@@ -638,16 +638,16 @@ int main(int argc, char** argv) {
 
       af::sync();
       // if (FLAGS_reportiters == 0) {
-        //runValAndSaveModel(curEpoch, netopt->getLr(), critopt->getLr());
-        //std::string mpath = "/root/w2l/aboutM/last_m.bin";
-        //W2lSerializer::save(mpath, m);
+      //   //runValAndSaveModel(curEpoch, netopt->getLr(), critopt->getLr());
+      //   //std::string mpath = "/root/w2l/aboutM/last_m.bin";
+      //   //W2lSerializer::save(mpath, m);
 
-        std::ofstream mfile("/root/w2l/CTC/lastm.txt");
-        if(mfile.is_open())
-        {
-          mfile << af::toString("last m is:", m);
-          mfile.close();
-        }
+      //   std::ofstream mfile("/root/w2l/CTC/lastm.txt");
+      //   if(mfile.is_open())
+      //   {
+      //     mfile << af::toString("last m is:", m);
+      //     mfile.close();
+      //   }
       // }
     }
   };
