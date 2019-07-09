@@ -214,6 +214,10 @@ int main(int argc, char** argv) {
       std::ofstream Mvarfile("/root/w2l/CTC/m_var.txt", std::ios::out);
       std::ofstream Mlossfile("/root/w2l/CTC/m_loss.txt", std::ios::out);
       std::ofstream mylossfile("/root/w2l/CTC/myloss.txt", std::ios::out);
+      std::ofstream myloss_grad_mean_file("/root/w2l/CTC/myloss_grad_mean.txt", std::ios::out);
+      std::ofstream myloss_grad_var_file("/root/w2l/CTC/myloss_grad_var.txt", std::ios::out);
+      std::ofstream mloss_grad_mean_file("/root/w2l/CTC/mloss_grad_mean.txt", std::ios::out);
+      std::ofstream mloss_grad_var_file("/root/w2l/CTC/mloss_grad_var.txt", std::ios::out);
 
       
       
@@ -546,8 +550,15 @@ int main(int argc, char** argv) {
           mGrad(j+1, af::span, af::span, af::span) = xGrad(j/2,af::span,af::span,af::span) * xGradm(j+1, af::span,af::span,af::span);
         }
 	
-        
-        mGrad = mGrad - 2 * lambda * m / (m_L2 * m_L2);
+        auto mGrad_aboutm_L2 = 2 * m / (m_L2 * m_L2);
+
+        myloss_grad_mean_file << af::mean<float>(mGrad)<<std::endl;
+        myloss_grad_var_file << af::var<float>(mGrad)<<std::endl;
+        mloss_grad_mean_file << af::mean<float>(mGrad_aboutm_L2)<<std::endl;
+        mloss_grad_var_file << af::var<float>(mGrad_aboutm_L2)<<std::endl;
+
+
+        mGrad = mGrad - lambda * mGrad_aboutm_L2;
 
         m = m - mylr * mGrad;
         
