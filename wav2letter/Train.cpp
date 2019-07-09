@@ -613,7 +613,7 @@ int main(int argc, char** argv) {
 
         auto mGrad = xGrad * xGradm;
 
-        auto mGrad_aboutm_entropy = 1/m;
+        auto mGrad_aboutm_entropy = 1/ af::transpose( m );
 
         myloss_grad_mean_file << af::mean<float>(mGrad)<<std::endl;
         myloss_grad_var_file << af::var<float>(mGrad)<<std::endl;
