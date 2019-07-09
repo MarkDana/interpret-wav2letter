@@ -443,7 +443,7 @@ int main(int argc, char** argv) {
             std::ofstream fft_mask_now(outdir);
             if(fft_mask_now.is_open())
             {
-               fft_mask_now<<af::toString("mask music is:", absinput_after_blur.array());
+               fft_mask_now<<af::toString("mask music is:", absinput_after_blur);
                fft_mask_now.close();
             }
         }
@@ -611,7 +611,7 @@ int main(int argc, char** argv) {
         }
           
 
-        mGrad = xGrad * xGradm;
+        auto mGrad = xGrad * xGradm;
 
         auto mGrad_aboutm_entropy = 1/m;
 
