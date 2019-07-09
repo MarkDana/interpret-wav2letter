@@ -465,7 +465,7 @@ int main(int argc, char** argv) {
         
         //LOG(INFO) << "network forward output dims is "<< output.array().dims();
         //LOG(INFO) << "load rawEmission preOutput dims is :" << preOutput.array().dims() ;
-	float lambda = 10;
+	float lambda = 0.1;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
         auto m_L2 = af::norm(m); //double
