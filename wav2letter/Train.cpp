@@ -404,7 +404,7 @@ int main(int argc, char** argv) {
             absinput_after_blur(i,j,af::span,af::span) = absinput(i,j,af::span,af::span);
 
             for (size_t p = 0; p < K; p=p+1){
-              if abs(i-p) >= m(p,j,0,0).scalar<float>(){
+              if (abs(i-p) >= m(p,j,0,0).scalar<float>()){
                 Z_add(p,j,i,af::span) = af::constant(0,noiseDims[3]);
                 Z_grad(p,j,i,af::span) = af::constant(0,noiseDims[3]);
               }
