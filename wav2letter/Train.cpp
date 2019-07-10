@@ -427,15 +427,22 @@ int main(int argc, char** argv) {
 
               int tmp1=af::floor(m_p_j).dims()[0];
               int tmp2=af::floor(m_p_j).dims()[1];
-              printf("floor dim is %d x %d\n",tmp1,tmp2);
+              int tmp3=af::floor(m_p_j).dims()[2];
+              int tmp4=af::floor(m_p_j).dims()[3];
+
+              printf("floor dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
 
               tmp1=m_p_j.dims()[0];
               tmp2=m_p_j.dims()[1];
-              printf("mpj dim is %d x %d\n",tmp1,tmp2);
+              tmp3=m_p_j.dims()[2];
+              tmp4=m_p_j.dims()[3];
+              printf("mpj dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
 
               tmp1=(2*m_p_j-af::floor(m_p_j)-1).dims()[0];
               tmp2=(2*m_p_j-af::floor(m_p_j)-1).dims()[1];
-              printf("(2*m_p_j-af::floor(m_p_j)-1) dim is %d x %d\n",tmp1,tmp2);
+              tmp3=(2*m_p_j-af::floor(m_p_j)-1).dims()[2];
+              tmp4=(2*m_p_j-af::floor(m_p_j)-1).dims()[3];
+              printf("(2*m_p_j-af::floor(m_p_j)-1) dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
 
               auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j));
               auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
