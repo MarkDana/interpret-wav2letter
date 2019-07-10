@@ -420,19 +420,19 @@ int main(int argc, char** argv) {
               auto m_p_j=m(ploop,jloop,0,0); // dim of K*1*1*1
               auto m_floor = af::moddims(af::floor(m_p_j),m_p_j.dims()); // dim of K*1*1*1
 
-              auto sum_m_p_j=af::moddims(m_floor*(2*m_p_j-m_floor-1),m_p_j.dims())+m_p_j;
+              auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j;
               auto sum_mpj_partial_to_mpj=2*m_p_j;
 
               //这里只看 abs(ploop-iloop)<m_p_j 的部分
               auto condition1 = (af::abs(ploop-iloop)<m_p_j);
               auto condition2 = ((ploop - iloop)==0);
 
-              int tmp1=(sum_m_p_j).dims()[0];
-              int tmp2=(sum_m_p_j).dims()[1];
-              int tmp3=(sum_m_p_j).dims()[2];
-              int tmp4=(sum_m_p_j).dims()[3];
+              auto tmp=(m_floor*(2*m_p_j-m_floor-1)).dims();
+              printf("m_floor*(2*m_p_j-m_floor-1) dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
-              printf("sum_m_p_j dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
+              tmp = (2*m_p_j-m_floor-1).dims();
+              printf("2*m_p_j-m_floor-1 dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
+
 
               // tmp1=m_p_j.dims()[0];
               // tmp2=m_p_j.dims()[1];
