@@ -113,7 +113,11 @@ int main(int argc, char** argv) {
 
   bool isMaster = (worldRank == 0);
 
+
+
   LOG_MASTER(INFO) << "Gflags after parsing \n" << serializeGflags("; ");
+
+  printf("okokokokokok\n");
 
   LOG_MASTER(INFO) << "Experiment path: " << runPath;
   LOG_MASTER(INFO) << "Experiment runidx: " << runIdx;
