@@ -160,9 +160,8 @@ int main(int argc, char** argv) {
   LOG_MASTER(INFO) << "[Network Optimizer] " << netoptim->prettyString();
   LOG_MASTER(INFO) << "[Criterion Optimizer] " << critoptim->prettyString();
 
-  printf("okokokokokok\n");
-
-  printf("%s\n",runPath.c_str());
+  printf("ok runpath is %s\n",runPath.c_str());
+  //07-10-上午：这行可以正常输出，但LOG只能打到119行，why
 
   /* ===================== Meters ===================== */
   
@@ -347,7 +346,9 @@ int main(int argc, char** argv) {
       crit->train();
 
       for (int i = 0; i < numNoise; i++) {
-        printf("okokok begin training m\n");
+        printf("now training m %d\n"，i);
+
+
         LOG(INFO) << "=================noise sample " << i << "==================";
         // meters
         af::sync();
@@ -376,6 +377,9 @@ int main(int argc, char** argv) {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
 	auto rawinput = pre_sample[kFftIdx];
+  printf("rawinput dim is %s\n",rawinput.dims());
+
+
 
 
 
