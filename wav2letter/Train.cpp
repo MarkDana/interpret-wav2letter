@@ -419,7 +419,7 @@ int main(int argc, char** argv) {
             auto sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
             auto sum_mpj_partial_to_mpj=2*m_p_j;
 
-            gfor (af::seq ploop, max(iloop-int(m_p_j),0), min(iloop+int(m_p_j),K-1)){
+            gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
               auto Z_add_pji = absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
               auto Z_grad_pji = absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
               Z_add(ploop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
