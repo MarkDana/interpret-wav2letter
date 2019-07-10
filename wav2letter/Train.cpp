@@ -429,6 +429,10 @@ int main(int argc, char** argv) {
               int tmp2=af::floor(m_p_j).dims()[1];
               printf("floor dim is %d x %d\n",tmp1,tmp2);
 
+              tmp1=m_p_j.dims()[0];
+              tmp2=m_p_j.dims()[1];
+              printf("mpj dim is %d x %d\n",tmp1,tmp2);
+
               tmp1=(2*m_p_j-af::floor(m_p_j)-1).dims()[0];
               tmp2=(2*m_p_j-af::floor(m_p_j)-1).dims()[1];
               printf("(2*m_p_j-af::floor(m_p_j)-1) dim is %d x %d\n",tmp1,tmp2);
