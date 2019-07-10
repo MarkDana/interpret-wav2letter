@@ -610,27 +610,25 @@ int main(int argc, char** argv) {
 
         printf("xGrad okok\n");
 
-        printf("why core dumped here\n");
+        af::dim4 tmpcout = mGrad.dims();
+        printf("mGrad is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
-        // auto tmpcout = mGrad.dims();
-        // printf("mGrad is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+        for (size_t igrad=0; igrad<K; ++igrad){
 
-        // for (size_t igrad=0; igrad<K; ++igrad){
+          tmpcout = mGrad(igrad,af::span,af::span,af::span).dims();
+          printf("mGrad is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
-        //   tmpcout = mGrad(igrad,af::span,af::span,af::span).dims();
-        //   printf("mGrad is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+          tmpcout = xGrad.dims();
+          printf("xGrad is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
-        //   tmpcout = xGrad.dims();
-        //   printf("xGrad is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+          tmpcout = Z_grad(af::span,af::span,igrad,af::span).dims();
+          printf("Z_grad(af::span,af::span,igrad,af::span) is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
-        //   tmpcout = Z_grad(af::span,af::span,igrad,af::span).dims();
-        //   printf("Z_grad(af::span,af::span,igrad,af::span) is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+          tmpcout = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0).dims();
+          printf("af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0) is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
-        //   tmpcout = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0).dims();
-        //   printf("af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0) is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
-
-        //   mGrad(igrad,af::span,af::span,af::span) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0);
-        // }
+          mGrad(igrad,af::span,af::span,af::span) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0);
+        }
 
         printf("mGrad okok\n");
 
