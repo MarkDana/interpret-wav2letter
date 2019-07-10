@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 
   printf("okokokokokok\n");
 
-printf("%s\n",runPath.c_str();
+printf("%s\n",runPath.c_str());
 
   /* ===================== Meters ===================== */
   
