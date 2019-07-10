@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
       fl::Variable tmpOutput = fl::sqrt(fl::var(preOutput,axes));
       tmpOutput = fl::tileAs(tmpOutput, preOutput);
       fl::Variable addpreOutput = preOutput/tmpOutput;
-	//for (size_t i = 0; i < tokendim; i=i+1)
+  //for (size_t i = 0; i < tokendim; i=i+1)
       //{
         //  auto framestdev=af::stdev<float>(preOutput_arr(i,af::span,af::span,af::span));
           //preOutput_arr(i,af::span,af::span,af::span)=preOutput_arr(i,af::span,af::span,af::span)/framestdev;
@@ -318,18 +318,18 @@ int main(int argc, char** argv) {
       //   zerowgt(30, 30) = 0;
 
       // fl::Variable zeroweight(zerowgt, true);
-	// auto addpreOutput = fl::Variable(af::matmul(zerowgt, preOutput.array()), false);
+  // auto addpreOutput = fl::Variable(af::matmul(zerowgt, preOutput.array()), false);
         //fl::Variable addpreOutput(preOutput_arr,true);
         //auto softmax_preOutput = fl::softmax(addpreOutput,1);
-	// ignore 5 dimensions, softmax rest dimensions
-	//auto tmpout = softmax_preOutput(af::seq(2, 27), af::span, af::span, af::span);
-	auto tmpout = addpreOutput(af::seq(2, 27), af::span, af::span, af::span);
+  // ignore 5 dimensions, softmax rest dimensions
+  //auto tmpout = softmax_preOutput(af::seq(2, 27), af::span, af::span, af::span);
+  auto tmpout = addpreOutput(af::seq(2, 27), af::span, af::span, af::span);
   auto softmax_add_preOutput = fl::softmax(tmpout, 0);
-	//softmax_preOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
+  //softmax_preOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
   // addpreOutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmpOut;
-//	auto softmax_tmpOut = fl::softmax(tmpout,1);
-//	auto softmax_preOut = fl::tileAs(softmax_tmpOut, softmax_preOutput.array().dims());
-	// auto softmax_add_preOutput = fl::matmul(zeroweight, softmax_preOutput);
+//  auto softmax_tmpOut = fl::softmax(tmpout,1);
+//  auto softmax_preOut = fl::tileAs(softmax_tmpOut, softmax_preOutput.array().dims());
+  // auto softmax_add_preOutput = fl::matmul(zeroweight, softmax_preOutput);
   // auto softmax_add_preOutput = fl::matmul(zeroweight, addpreOutput);
 
 
@@ -345,69 +345,15 @@ int main(int argc, char** argv) {
       ntwrk->train();
       crit->train();
 
-      for (int i = 0; i < numNoise; i++) {
-        printf("now training m %d \n"，i);
 
+      ///////////////////////////////////////////////////////////////////////////////////////////////
+      auto rawinput = pre_sample[kFftIdx];
+      af::array absinput(af::dim4(K, T, noiseDims[2], noiseDims[3]));
+      auto Z_add = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_add is Z
+      auto Z_grad = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_grad is partial(Z_pji)/partial(m_p_j)
+      af::array absinput_after_blur(af::dim4(K, T, noiseDims[2], noiseDims[3]));
 
-        LOG(INFO) << "=================noise sample " << i << "==================";
-        // meters
-        af::sync();
-        
-        if (af::anyTrue<bool>(af::isNaN(pre_sample[kInputIdx])) ||
-            af::anyTrue<bool>(af::isNaN(pre_sample[kTargetIdx]))) {
-          LOG(FATAL) << "pre_sample has NaN values";
-        }
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-	//auto epsilon = (af::randn(noiseDims)) * 4268; 
-        auto epsilon = fl::normal(noiseDims,fftstdev,0).array(); //add noises
-	LOG(INFO)<<"epsilon mean is:"<<af::mean<float>(epsilon);
-	LOG(INFO)<<"epsilon stdev is:"<<af::stdev<float>(epsilon);
-	//save last iter epsilon parameter:
-	if (i == numNoise-1)
-	{
-	   std::ofstream epsfile("/root/w2l/CTC/epsilon.txt");
-	   if(epsfile.is_open())
-  	   {
-	      epsfile << af::toString("epsilon values:", epsilon);
-              epsfile.close();
-	   }
-	}
-
-  
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-	auto rawinput = pre_sample[kFftIdx];
-
-  int Ktmp=rawinput.dims()[0];
-  int Ttmp=rawinput.dims()[1];
-  printf("rawinput dim is %d x %d\n",Ktmp,Ttmp);
-
-
-
-
-
-	//LOG(INFO)<<af::toString("epsilon 6 values:", epsilon(af::seq(6)));
-	//LOG(INFO)<<af::toString("m 6 values:", m(af::seq(6)));
-	//LOG(INFO)<<af::toString("rawinput 6 values:",rawinput(af::seq(6)));
-        
-
-        
-
-        
-        af::array absinput(af::dim4(K, T, noiseDims[2], noiseDims[3]));
-        af::array backinput(noiseDims);
-
-        
-
-        auto Z_add = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_add is Z
-        auto Z_grad = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_grad is partial(Z_pji)/partial(m_p_j)
-        af::array absinput_after_blur(af::dim4(K, T, noiseDims[2], noiseDims[3]));
-
-        
-        //LOG(INFO) << "m_epsilon mean :" << af::mean<float>(m*epsilon);
-        //LOG(INFO) << "m_epsilon stdev :" << af::stdev<float>(m*epsilon);
-        
-        for (size_t j = 0; j < 2*K; j=j+2)
+      for (size_t j = 0; j < 2*K; j=j+2)
         {
             auto fir = rawinput(j, af::span, af::span, af::span);
             //LOG(INFO) << "fir row(i) dims is :" << fir.array().dims() << " " << af::toString("row(i) first value is ", fir.array()(0));
@@ -415,42 +361,79 @@ int main(int argc, char** argv) {
             //note shallow copy in fl::Variable
             auto temp = af::sqrt(fir * fir + sec * sec);
             absinput(j/2, af::span, af::span, af::span) =  temp;
-            backinput(j, af::span, af::span, af::span) = temp;
-            backinput(j+1, af::span, af::span, af::span) = temp;
         }
 
-        for (size_t i = 0; i < K; i=i+1){
-          for (size_t j = 0; j < T; j=j+1){
-            absinput_after_blur(i,j,af::span,af::span) = absinput(i,j,af::span,af::span);
 
-            for (size_t p = 0; p < K; p=p+1){
-              if (abs(i-p) >= m(p,j,0,0).scalar<float>()){
-                Z_add(p,j,i,af::span) = af::constant(0,noiseDims[3]);
-                Z_grad(p,j,i,af::span) = af::constant(0,noiseDims[3]);
-              }
-              else{
-                float m_p_j=m(p,j,0,0).scalar<float>();
-                float sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
-                float sum_mpj_partial_to_mpj=2*m_p_j;
+      for (int i = 0; i < numNoise; i++) {
+        printf("now training m%d\n",i);
 
-                if (i!=p){
-                  float Z_add_pji = absinput(p,j,0,0).scalar<float>()*(m_p_j-abs(i-p))/sum_m_p_j;
-                  float Z_grad_pji = absinput(p,j,0,0).scalar<float>()*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(i-p)))/(sum_m_p_j*sum_m_p_j);
-                  Z_add(p,j,i,af::span) = af::constant(Z_add_pji,noiseDims[3]);
-                  Z_grad(p,j,i,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
-                
-                }else{
-                  float Z_add_pji = absinput(p,j,0,0).scalar<float>()*(m_p_j-sum_m_p_j)/sum_m_p_j;
-                  float Z_grad_pji = absinput(p,j,0,0).scalar<float>()*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j);
-                  Z_add(p,j,i,af::span) = af::constant(Z_add_pji,noiseDims[3]);
-                  Z_grad(p,j,i,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
-                }
-              } 
 
-              absinput_after_blur(i,j,af::span)+=Z_add(p,j,i);
-            }
-          } 
+        LOG(INFO) << "=================noise sample " << i << "==================";
+        // meters
+        af::sync();
+        
+        if (af::anyTrue<bool>(af::isNaN(rawinput)) ||
+            af::anyTrue<bool>(af::isNaN(rawinput))) {
+          LOG(FATAL) << "pre_sample has NaN values";
         }
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+  //auto epsilon = (af::randn(noiseDims)) * 4268; 
+        auto epsilon = fl::normal(noiseDims,fftstdev,0).array(); //add noises
+  LOG(INFO)<<"epsilon mean is:"<<af::mean<float>(epsilon);
+  LOG(INFO)<<"epsilon stdev is:"<<af::stdev<float>(epsilon);
+  //save last iter epsilon parameter:
+  if (i == numNoise-1)
+  {
+     std::ofstream epsfile("/root/w2l/CTC/epsilon.txt");
+     if(epsfile.is_open())
+       {
+        epsfile << af::toString("epsilon values:", epsilon);
+              epsfile.close();
+     }
+  }
+
+
+
+  //LOG(INFO)<<af::toString("epsilon 6 values:", epsilon(af::seq(6)));
+  //LOG(INFO)<<af::toString("m 6 values:", m(af::seq(6)));
+  //LOG(INFO)<<af::toString("rawinput 6 values:",rawinput(af::seq(6)));
+        
+        
+        //LOG(INFO) << "m_epsilon mean :" << af::mean<float>(m*epsilon);
+        //LOG(INFO) << "m_epsilon stdev :" << af::stdev<float>(m*epsilon);
+      
+
+        for (size_t iloop = 0; iloop < K; ++iloop){
+          for (size_t jloop = 0; jloop < T; ++jloop){
+            absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
+
+            
+            // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
+            gfor (af::seq ploop, K){
+              auto m_p_j = af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
+              auto m_floor = af::floor(m_p_j); // dim of K*1*1*1
+
+              auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j; // dim of K*1*1*1
+              auto sum_mpj_partial_to_mpj=2*m_p_j; // dim of K*1*1*1
+
+              //这里只看 abs(ploop-iloop)<m_p_j 的部分
+              auto condition1 = (af::abs(ploop-iloop)<m_p_j);
+              auto condition2 = ((ploop - iloop)==0);
+
+
+              auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(m_p_j-sum_m_p_j)/sum_m_p_j));
+              auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
+              
+
+              Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
+              Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
+            } 
+
+            absinput_after_blur(iloop,jloop,af::span)+=af::sum(Z_add(af::span,jloop,iloop),0);
+          }
+          printf("i=%d\n",iloop);
+        } 
+        
 
         //Notice:here prefft is 2K*T
         //Notice:but maskMusic is K*T, and angle remains still
@@ -468,11 +451,11 @@ int main(int argc, char** argv) {
             }
         }
 
-
         //T x K x FLAGS_channels x batchSz
         // af::array trInput = af::transpose(absinput);
 
         af::array trInput = af::transpose(absinput_after_blur);
+        printf("trInput okok\n");
 
         // dft kInputIdx not normalized
         //LOG(INFO) << "dft abs mean :" << af::mean<float>(absinput);
@@ -497,18 +480,18 @@ int main(int argc, char** argv) {
 
         // forward
         auto output = ntwrk->forward({trueInput}).front();
-	auto output_arr = output.array();
-	int tokendim=outputDims[0];	
-	
-	std::vector<int> axes1{1};
-	fl::Variable tmpaddOutput = fl::sqrt(fl::var(output, axes1));
-	tmpaddOutput = fl::tileAs(tmpaddOutput, output);
-	fl::Variable addoutput = output/tmpaddOutput;
+  auto output_arr = output.array();
+  int tokendim=outputDims[0]; 
+  
+  std::vector<int> axes1{1};
+  fl::Variable tmpaddOutput = fl::sqrt(fl::var(output, axes1));
+  tmpaddOutput = fl::tileAs(tmpaddOutput, output);
+  fl::Variable addoutput = output/tmpaddOutput;
 
      //   for (size_t j = 0; j < tokendim; j=j+1)
       //{
-        //  	auto framestdev=af::stdev<float>(output_arr(j,af::span,af::span,af::span));  
-	//	output_arr(j,af::span,af::span,af::span)=output_arr(j,af::span,af::span,af::span)/framestdev;
+        //    auto framestdev=af::stdev<float>(output_arr(j,af::span,af::span,af::span));  
+  //  output_arr(j,af::span,af::span,af::span)=output_arr(j,af::span,af::span,af::span)/framestdev;
           
       //}
 
@@ -519,35 +502,38 @@ int main(int argc, char** argv) {
          nowOutFile.close();
       }
  //        af::array wgt = af::identity(31, 31); // numClasses are 31 tokens
-	// wgt(0, 0) = 0;
+  // wgt(0, 0) = 0;
  //        wgt(1, 1) = 0;
        
  //        wgt(28, 28) = 0;
  //        wgt(29, 29) = 0;
  //        wgt(30, 30) = 0;
  //        auto addweight = fl::Variable(wgt, true);
-	      // auto addoutput = fl::matmul(addweight, output);
+        // auto addoutput = fl::matmul(addweight, output);
         //fl::Variable addoutput(output_arr,true);
-	// auto softmax_output = fl::softmax(addoutput,1);
-	auto tmp = addoutput(af::seq(2,27),af::span,af::span,af::span);
-	auto softmax_add_output = fl::softmax(tmp,0);
-	// addoutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmp; 
-	// auto softmax_add_output = fl::matmul(addweight, addoutput);
+  // auto softmax_output = fl::softmax(addoutput,1);
+  auto tmp = addoutput(af::seq(2,27),af::span,af::span,af::span);
+  auto softmax_add_output = fl::softmax(tmp,0);
+  // addoutput(af::seq(2,27),af::span,af::span,af::span)=softmax_tmp; 
+  // auto softmax_add_output = fl::matmul(addweight, addoutput);
 
         af::sync();
-	if(i == numNoise-1)
-	{
-	    std::ofstream nowOutFile_0("/root/w2l/CTC/lastOutput_0.txt");
-	    if(nowOutFile_0.is_open())
-	    {
-	       nowOutFile_0<<af::toString("lastOutput_0 is:", softmax_add_output.array());
-	       nowOutFile_0.close();
-	    }
+  if(i == numNoise-1)
+  {
+      std::ofstream nowOutFile_0("/root/w2l/CTC/lastOutput_0.txt");
+      if(nowOutFile_0.is_open())
+      {
+         nowOutFile_0<<af::toString("lastOutput_0 is:", softmax_add_output.array());
+         nowOutFile_0.close();
+      }
   }
         
         //LOG(INFO) << "network forward output dims is "<< output.array().dims();
         //LOG(INFO) << "load rawEmission preOutput dims is :" << preOutput.array().dims() ;
-	float lambda = 0.1;
+
+  printf("backward okok\n");
+
+  float lambda = 0.1;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
         auto m_entropy = af::sum<float> (af::log(m)); 
@@ -583,20 +569,20 @@ int main(int argc, char** argv) {
         netopt->zeroGrad();
         critopt->zeroGrad();
  //        zeroweight.zeroGrad();
-	// addweight.zeroGrad();
+  // addweight.zeroGrad();
 
         //Compute gradients using backprop
         myloss.backward();
         af::sync();
-	//Print output's Grad
-	if(i == numNoise-1)
-	{
+  //Print output's Grad
+  if(i == numNoise-1)
+  {
             std::ofstream outputGradFile("/root/w2l/CTC/outputGrad.txt");
-	    if(outputGradFile.is_open())
-	    {
-	        outputGradFile << af::toString("output Grad is:", output.grad().array());
+      if(outputGradFile.is_open())
+      {
+          outputGradFile << af::toString("output Grad is:", output.grad().array());
                 outputGradFile.close();
-	    }
+      }
   }
 
         if (FLAGS_maxgradnorm > 0) {
@@ -621,6 +607,8 @@ int main(int argc, char** argv) {
 
         //xGrad is ∂ myloss / ∂ absinput_after_blur;
 
+        printf("xGrad okok\n");
+
         af::array xGradm = af::constant(0, af::dim4(K, T, T, K));
         for (size_t i = 0; i < K; i=i+1){
           for (size_t j = 0; j < T; j=j+1){
@@ -629,6 +617,8 @@ int main(int argc, char** argv) {
             }
           }
         }
+
+        printf("xGradm okok\n");
           
 
         auto mGrad = xGrad * xGradm;
