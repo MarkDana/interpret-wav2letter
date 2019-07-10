@@ -430,21 +430,26 @@ int main(int argc, char** argv) {
               auto tmp=(m_floor*(2*m_p_j-m_floor-1)).dims();
               printf("m_floor*(2*m_p_j-m_floor-1) dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
-              tmp = (2*m_p_j-m_floor-1).dims();
+              tmp = (2*m_p_j-m_floor - af::constant(1,m_p_j.dims()).dims());
               printf("2*m_p_j-m_floor-1 dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
+              tmp = (m_p_j).dims();
+              printf("m_p_j dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
-              // tmp1=m_p_j.dims()[0];
-              // tmp2=m_p_j.dims()[1];
-              // tmp3=m_p_j.dims()[2];
-              // tmp4=m_p_j.dims()[3];
-              // printf("mpj dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
+              tmp = (m_floor).dims();
+              printf("m_floor dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
-              // tmp1=sum_m_p_j.dims()[0];
-              // tmp2=sum_m_p_j.dims()[1];
-              // tmp3=sum_m_p_j.dims()[2];
-              // tmp4=sum_m_p_j.dims()[3];
-              // printf("sum_m_p_j dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
+              tmp = (2*m_p_j).dims();
+              printf("2*m_p_j dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
+
+              tmp = (m_p_j-1).dims();
+              printf("m_p_j-1 dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
+
+              tmp = (m_p_j- af::constant(1,m_p_j.dims()).dims());
+              printf("2*m_p_j dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
+
+
+
 
               auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j));
               auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
