@@ -421,8 +421,8 @@ int main(int argc, char** argv) {
               auto sum_m_p_j=af::floor(m_p_j)*(2*m_p_j-af::floor(m_p_j)-1)+m_p_j;
               auto sum_mpj_partial_to_mpj=2*m_p_j;
 
-              auto Z_add_pji = (abs(ploop-iloop)<m_p_j)*absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
-              auto Z_grad_pji = (abs(ploop-iloop)<m_p_j)*absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
+              auto Z_add_pji = (abs(ploop-iloop)<m_p_j).as(f32)*absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
+              auto Z_grad_pji = (abs(ploop-iloop)<m_p_j).as(f32)*absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
               
               Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
               Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
