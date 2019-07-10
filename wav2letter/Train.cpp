@@ -413,10 +413,10 @@ int main(int argc, char** argv) {
         gfor (seq iloop, K){
           gfor (seq jloop, T){
             absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
+            printf("%d\t%d\n",iloop,jloop);
 
             gfor (seq ploop, K){
 
-              printf("%d\t%d\t%d\n",iloop,jloop,ploop);
 
               if (abs(iloop-ploop) < m(ploop,jloop,0,0).scalar<float>()){
                 float m_p_j=m(ploop,jloop,0,0).scalar<float>();
