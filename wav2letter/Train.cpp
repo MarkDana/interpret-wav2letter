@@ -420,23 +420,22 @@ int main(int argc, char** argv) {
               auto m_p_j = af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
               auto m_floor = af::floor(m_p_j); // dim of K*1*1*1
 
-              auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j;
-              auto sum_mpj_partial_to_mpj=2*m_p_j;
+              auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j; // dim of K*1*1*1
+              auto sum_mpj_partial_to_mpj=2*m_p_j; // dim of K*1*1*1
 
               //这里只看 abs(ploop-iloop)<m_p_j 的部分
               auto condition1 = (af::abs(ploop-iloop)<m_p_j);
               auto condition2 = ((ploop - iloop)==0);
 
-              auto tmp=(sum_m_p_j).dims();
-              printf("sum_m_p_j dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
-              tmp = (sum_mpj_partial_to_mpj).dims();
-              printf("sum_mpj_partial_to_mpj dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
-
 
               auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j));
               auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
+              
+              auto tmp=(Z_add_pji).dims();
+              printf("Z_add_pji dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
+
+              tmp = (Z_grad_pji).dims();
+              printf("Z_grad_pji dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
               
 
               Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
