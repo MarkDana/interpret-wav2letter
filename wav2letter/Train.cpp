@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 
   printf("okokokokokok\n");
 
-printf("%s\n",runPath.c_str());
+  printf("%s\n",runPath.c_str());
 
   /* ===================== Meters ===================== */
   
@@ -347,6 +347,7 @@ printf("%s\n",runPath.c_str());
       crit->train();
 
       for (int i = 0; i < numNoise; i++) {
+        printf("okokok begin training m\n");
         LOG(INFO) << "=================noise sample " << i << "==================";
         // meters
         af::sync();
