@@ -455,6 +455,7 @@ int main(int argc, char** argv) {
         // af::array trInput = af::transpose(absinput);
 
         af::array trInput = af::transpose(absinput_after_blur);
+        printf("trInput okok\n");
 
         // dft kInputIdx not normalized
         //LOG(INFO) << "dft abs mean :" << af::mean<float>(absinput);
@@ -529,6 +530,9 @@ int main(int argc, char** argv) {
         
         //LOG(INFO) << "network forward output dims is "<< output.array().dims();
         //LOG(INFO) << "load rawEmission preOutput dims is :" << preOutput.array().dims() ;
+
+  printf("backward okok\n");
+
   float lambda = 0.1;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
@@ -603,6 +607,8 @@ int main(int argc, char** argv) {
 
         //xGrad is ∂ myloss / ∂ absinput_after_blur;
 
+        printf("xGrad okok\n");
+
         af::array xGradm = af::constant(0, af::dim4(K, T, T, K));
         for (size_t i = 0; i < K; i=i+1){
           for (size_t j = 0; j < T; j=j+1){
@@ -611,6 +617,8 @@ int main(int argc, char** argv) {
             }
           }
         }
+
+        printf("xGradm okok\n");
           
 
         auto mGrad = xGrad * xGradm;
