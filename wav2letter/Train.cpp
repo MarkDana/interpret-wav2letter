@@ -418,7 +418,7 @@ int main(int argc, char** argv) {
             // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
             gfor (af::seq ploop, K){
               auto m_p_j=m(ploop,jloop,0,0); // dim of K*1*1*1
-              auto m_floor = af::moddims(af::floor(m_p_j),m_p_j.dims());
+              auto m_floor = af::moddims(af::floor(m_p_j),m_p_j.dims()); // dim of K*1*1*1
 
               auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1)+m_p_j;
               auto sum_mpj_partial_to_mpj=2*m_p_j;
@@ -427,24 +427,24 @@ int main(int argc, char** argv) {
               auto condition1 = (af::abs(ploop-iloop)<m_p_j);
               auto condition2 = ((ploop - iloop)==0);
 
-              int tmp1=m_floor.dims()[0];
-              int tmp2=m_floor.dims()[1];
-              int tmp3=m_floor.dims()[2];
-              int tmp4=m_floor.dims()[3];
+              int tmp1=(m_p_j*m_p_j).dims()[0];
+              int tmp2=(m_p_j*m_p_j).dims()[1];
+              int tmp3=(m_p_j*m_p_j).dims()[2];
+              int tmp4=(m_p_j*m_p_j).dims()[3];
 
-              printf("floor dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
+              printf("muti dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
 
-              tmp1=m_p_j.dims()[0];
-              tmp2=m_p_j.dims()[1];
-              tmp3=m_p_j.dims()[2];
-              tmp4=m_p_j.dims()[3];
-              printf("mpj dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
+              // tmp1=m_p_j.dims()[0];
+              // tmp2=m_p_j.dims()[1];
+              // tmp3=m_p_j.dims()[2];
+              // tmp4=m_p_j.dims()[3];
+              // printf("mpj dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
 
-              tmp1=sum_m_p_j.dims()[0];
-              tmp2=sum_m_p_j.dims()[1];
-              tmp3=sum_m_p_j.dims()[2];
-              tmp4=sum_m_p_j.dims()[3];
-              printf("sum_m_p_j dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
+              // tmp1=sum_m_p_j.dims()[0];
+              // tmp2=sum_m_p_j.dims()[1];
+              // tmp3=sum_m_p_j.dims()[2];
+              // tmp4=sum_m_p_j.dims()[3];
+              // printf("sum_m_p_j dim is %d x %d x %d x %d\n",tmp1,tmp2,tmp3,tmp4);
 
               auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j));
               auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
