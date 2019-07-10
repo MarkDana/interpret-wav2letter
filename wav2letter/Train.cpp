@@ -427,7 +427,7 @@ int main(int argc, char** argv) {
 
               //这里只看 abs(ploop-iloop)<m_p_j 的部分
               auto condition1 = (af::abs(ploop-iloop)<m_p_j).as(f32);
-              auto condition2 = (ploop == iloop).as(f32);
+              auto condition2 = ((ploop - iloop)==0).as(f32);
 
               int tmp1=condition1.dims()[0];
               int tmp2=condition1.dims()[1];
