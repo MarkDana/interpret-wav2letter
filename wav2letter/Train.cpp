@@ -431,7 +431,7 @@ int main(int argc, char** argv) {
 
             absinput_after_blur(iloop,jloop,af::span)+=af::sum(Z_add(af::span,jloop,iloop),0);
           }
-          printf("i=%d\n",iloop);
+          // printf("i=%d\n",iloop);
         } 
         
 
@@ -455,7 +455,7 @@ int main(int argc, char** argv) {
         // af::array trInput = af::transpose(absinput);
 
         af::array trInput = af::transpose(absinput_after_blur);
-        printf("trInput okok\n");
+        // printf("trInput okok\n");
 
         // dft kInputIdx not normalized
         //LOG(INFO) << "dft abs mean :" << af::mean<float>(absinput);
@@ -531,7 +531,7 @@ int main(int argc, char** argv) {
         //LOG(INFO) << "network forward output dims is "<< output.array().dims();
         //LOG(INFO) << "load rawEmission preOutput dims is :" << preOutput.array().dims() ;
 
-  printf("backward okok\n");
+  // printf("backward okok\n");
 
   float lambda = 0.1;
         //float lambda = 100;
@@ -608,29 +608,16 @@ int main(int argc, char** argv) {
 
         //xGrad is ∂ myloss / ∂ absinput_after_blur;
 
-        printf("xGrad okok\n");
+        // printf("xGrad okok\n");
 
-        af::dim4 tmpcout = mGrad.dims();
-        printf("mGrad is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+        // af::dim4 tmpcout = mGrad.dims();
+        // printf("mGrad is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
         for (size_t igrad=0; igrad<K; ++igrad){
-
-          tmpcout = mGrad(igrad,af::span,af::span,af::span).dims();
-          printf("mGrad is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
-
-          tmpcout = xGrad.dims();
-          printf("xGrad is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
-
-          tmpcout = Z_grad(af::span,af::span,igrad,af::span).dims();
-          printf("Z_grad(af::span,af::span,igrad,af::span) is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
-
-          tmpcout = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0).dims();
-          printf("af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0) is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
-
           mGrad(igrad,af::span,af::span,af::span) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0);
         }
 
-        printf("mGrad okok\n");
+        // printf("mGrad okok\n");
 
         auto mGrad_aboutm_entropy = 1 / m ;
 
