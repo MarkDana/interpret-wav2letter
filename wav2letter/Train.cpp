@@ -10,6 +10,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "cstdio"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/types/unordered_map.hpp>
@@ -161,7 +162,7 @@ int main(int argc, char** argv) {
 
   printf("okokokokokok\n");
 
-printf("%s\n",runPath);
+printf("%s\n",runPath.c_str();
 
   /* ===================== Meters ===================== */
   
