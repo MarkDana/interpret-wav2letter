@@ -117,10 +117,11 @@ int main(int argc, char** argv) {
 
   LOG_MASTER(INFO) << "Gflags after parsing \n" << serializeGflags("; ");
 
-  printf("okokokokokok\n");
 
   LOG_MASTER(INFO) << "Experiment path: " << runPath;
   LOG_MASTER(INFO) << "Experiment runidx: " << runIdx;
+
+printf("okokokokokok\n");
 
   std::unordered_map<std::string, std::string> config = {
       {kProgramName, exec},
@@ -645,8 +646,8 @@ int main(int argc, char** argv) {
 
       af::sync();
 
-      // if (FLAGS_reportiters == 0) {
-      if (0 == 0) {
+      if (FLAGS_reportiters == 0) {
+      // if (0 == 0) {
         //runValAndSaveModel(curEpoch, netopt->getLr(), critopt->getLr());
         //std::string mpath = "/root/w2l/aboutM/last_m.bin";
         //W2lSerializer::save(mpath, m);
@@ -676,3 +677,4 @@ int main(int argc, char** argv) {
   LOG_MASTER(INFO) << "Finished my training";
   return 0;
 }
+
