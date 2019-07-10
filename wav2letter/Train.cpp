@@ -121,7 +121,6 @@ int main(int argc, char** argv) {
   LOG_MASTER(INFO) << "Experiment path: " << runPath;
   LOG_MASTER(INFO) << "Experiment runidx: " << runIdx;
 
-printf("okokokokokok\n");
 
   std::unordered_map<std::string, std::string> config = {
       {kProgramName, exec},
@@ -159,6 +158,10 @@ printf("okokokokokok\n");
   }
   LOG_MASTER(INFO) << "[Network Optimizer] " << netoptim->prettyString();
   LOG_MASTER(INFO) << "[Criterion Optimizer] " << critoptim->prettyString();
+
+  printf("okokokokokok\n");
+
+printf("%s\n",runPath);
 
   /* ===================== Meters ===================== */
   
