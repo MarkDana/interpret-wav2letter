@@ -611,7 +611,20 @@ int main(int argc, char** argv) {
         printf("xGrad okok\n");
 
         for (size_t igrad=0; igrad<K; ++igrad){
-          mGrad(igrad) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,0),0);
+
+          auto tmpcout = mGrad(igrad,af::span,af::span,af::span).dims();
+          printf("tmpcout is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+
+          tmpcout = xGrad.dims();
+          printf("xGrad is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+
+          tmpcout = Z_grad(af::span,af::span,igrad,af::span).dims();
+          printf("Z_grad(af::span,af::span,igrad,af::span) is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+
+          tmpcout = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0).dims();
+          printf("af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0) is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+
+          mGrad(igrad,af::span,af::span,af::span) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0);
         }
 
         printf("mGrad okok\n");
