@@ -604,24 +604,17 @@ int main(int argc, char** argv) {
         auto dmu = af::sum<float>(dy * (-1.0/std::pow(sigma2, 0.5))) + af::sum<float>(-2 * (trInput - mean)) * dsigma2 / (T * K);
         auto dx = dy / std::pow(sigma2, 0.5) + dsigma2 * 2 * (trInput - mean) / (T * K) + dmu / (T * K); 
         af::array xGrad = af::transpose(dx); // K x T x 1 x 1
+        af::array mGrad = af::constant(0, af::dim4(K, T, 1, 1));
 
         //xGrad is ∂ myloss / ∂ absinput_after_blur;
 
         printf("xGrad okok\n");
 
-        af::array xGradm = af::constant(0, af::dim4(K, T, T, K));
-        for (size_t i = 0; i < K; i=i+1){
-          for (size_t j = 0; j < T; j=j+1){
-            for (size_t p = 0; p < K; p=p+1){
-              xGradm(i,j,j,p)=Z_grad(p,j,i,0);
-            }
-          }
+        gfor (af::seq igrad, K){
+          mGrad(igrad) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,0),0);
         }
 
-        printf("xGradm okok\n");
-          
-
-        auto mGrad = xGrad * xGradm;
+        printf("mGrad okok\n");
 
         auto mGrad_aboutm_entropy = 1 / m ;
 
