@@ -610,7 +610,7 @@ int main(int argc, char** argv) {
 
         printf("xGrad okok\n");
 
-        for (size_t igrad=0; igrad<K; +=igrad){
+        for (size_t igrad=0; igrad<K; ++igrad){
           mGrad(igrad) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,0),0);
         }
 
