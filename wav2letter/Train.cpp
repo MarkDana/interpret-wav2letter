@@ -425,13 +425,13 @@ int main(int argc, char** argv) {
               auto condition1 = (af::abs(ploop-iloop)<m_p_j);
               auto condition2 = ((ploop - iloop)==0);
 
-              int tmp1=sum_m_p_j.dims()[0];
-              int tmp2=sum_m_p_j.dims()[1];
-              printf("sum_m_p_j dim is %d x %d\n",tmp1,tmp2);
+              int tmp1=af::floor(m_p_j).dims()[0];
+              int tmp2=af::floor(m_p_j).dims()[1];
+              printf("floor dim is %d x %d\n",tmp1,tmp2);
 
-              // tmp1=condition2.dims()[0];
-              // tmp2=condition2.dims()[1];
-              // printf("condition2 dim is %d x %d\n",tmp1,tmp2);
+              tmp1=(2*m_p_j-af::floor(m_p_j)-1).dims()[0];
+              tmp2=(2*m_p_j-af::floor(m_p_j)-1).dims()[1];
+              printf("(2*m_p_j-af::floor(m_p_j)-1) dim is %d x %d\n",tmp1,tmp2);
 
               auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j));
               auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
