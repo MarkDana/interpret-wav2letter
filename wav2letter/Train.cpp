@@ -346,7 +346,7 @@ int main(int argc, char** argv) {
       crit->train();
 
       for (int i = 0; i < numNoise; i++) {
-        printf("now training m %d\n"，i);
+        printf("now training m %d \n"，i);
 
 
         LOG(INFO) << "=================noise sample " << i << "==================";
@@ -377,7 +377,7 @@ int main(int argc, char** argv) {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
 	auto rawinput = pre_sample[kFftIdx];
-  printf("rawinput dim is %s\n",rawinput.dims());
+  printf("rawinput dim is %d x %d\n",rawinput.dims()[0],rawinput.dims()[1]);
 
 
 
