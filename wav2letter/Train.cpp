@@ -378,19 +378,10 @@ int main(int argc, char** argv) {
         ///////////////////////////////////////////////////////////////////////////////////////////////
   auto rawinput = pre_sample[kFftIdx];
 
-  int Ktmp=rawinput.dims()[0];
-  int Ttmp=rawinput.dims()[1];
-  printf("rawinput dim is %d x %d\n",Ktmp,Ttmp);
-
-
-
-
 
   //LOG(INFO)<<af::toString("epsilon 6 values:", epsilon(af::seq(6)));
   //LOG(INFO)<<af::toString("m 6 values:", m(af::seq(6)));
   //LOG(INFO)<<af::toString("rawinput 6 values:",rawinput(af::seq(6)));
-        
-
         
 
         
@@ -424,11 +415,15 @@ int main(int argc, char** argv) {
             absinput_after_blur(i,j,af::span,af::span) = absinput(i,j,af::span,af::span);
 
             for (size_t p = 0; p < K; p=p+1){
+              
+              printf("%d\t%d\t%d\n"i,j,p);
+
               if (abs(i-p) >= m(p,j,0,0).scalar<float>()){
                 Z_add(p,j,i,af::span) = af::constant(0,noiseDims[3]);
                 Z_grad(p,j,i,af::span) = af::constant(0,noiseDims[3]);
               }
               else{
+
                 float m_p_j=m(p,j,0,0).scalar<float>();
                 float sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
                 float sum_mpj_partial_to_mpj=2*m_p_j;
@@ -446,7 +441,6 @@ int main(int argc, char** argv) {
                   Z_grad(p,j,i,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
                 }
               } 
-
               absinput_after_blur(i,j,af::span)+=Z_add(p,j,i);
             }
           } 
@@ -468,6 +462,11 @@ int main(int argc, char** argv) {
             }
         }
 
+
+
+        // int Ktmp=rawinput.dims()[0];
+        // int Ttmp=rawinput.dims()[1];
+        // printf("rawinput dim is %d x %d\n",Ktmp,Ttmp);
 
         //T x K x FLAGS_channels x batchSz
         // af::array trInput = af::transpose(absinput);
