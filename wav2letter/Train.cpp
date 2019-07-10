@@ -234,6 +234,10 @@ int main(int argc, char** argv) {
       //std::ofstream totGradnormFile("/root/w2l/aboutM/totGradnorm.txt", std::ios::out);
 
       af::dim4 noiseDims = pre_sample[kFftIdx].dims(); //2K x T x FLAGS_channels x batchSz
+      int T = noiseDims[1];
+      int K = noiseDims[0]/2;
+      auto m = af::constant(0.1, af::dim4(K, T, noiseDims[2], noiseDims[3])); // Now m is K x T x FLAGS_channels x batchSz
+
       // auto m = af::constant(0.1, noiseDims);
       //auto m = af::constant(0.1,noiseDims);
       //auto m=fl::normal(noiseDims,0.002,0.1).array();
@@ -374,14 +378,13 @@ int main(int argc, char** argv) {
 	//LOG(INFO)<<af::toString("rawinput 6 values:",rawinput(af::seq(6)));
         
 
-        int T = noiseDims[1];
-        int K = noiseDims[0]/2;
+        
 
         
         af::array absinput(af::dim4(K, T, noiseDims[2], noiseDims[3]));
         af::array backinput(noiseDims);
 
-        auto m = af::constant(0.1, absinput.dims()); // Now m is K x T x FLAGS_channels x batchSz
+        
 
         auto Z_add = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_add is Z
         auto Z_grad = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_grad is partial(Z_pji)/partial(m_p_j)
@@ -617,7 +620,7 @@ int main(int argc, char** argv) {
 
         auto mGrad = xGrad * xGradm;
 
-        auto mGrad_aboutm_entropy = 1/ af::transpose( m );
+        auto mGrad_aboutm_entropy = 1 / m ;
 
         myloss_grad_mean_file << af::mean<float>(mGrad)<<std::endl;
         myloss_grad_var_file << af::var<float>(mGrad)<<std::endl;
