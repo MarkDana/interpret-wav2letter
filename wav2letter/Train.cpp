@@ -433,8 +433,8 @@ int main(int argc, char** argv) {
               int tmp2=condition1.dims()[1];
               printf("condition1 dim is %d x %d\n",tmp1,tmp2);
 
-              int tmp1=condition2.dims()[0];
-              int tmp2=condition2.dims()[1];
+              tmp1=condition2.dims()[0];
+              tmp2=condition2.dims()[1];
               printf("condition2 dim is %d x %d\n",tmp1,tmp2);
 
               auto Z_add_pji = condition1 * ((1-condition2) * (absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j) + condition2 * (absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j));
