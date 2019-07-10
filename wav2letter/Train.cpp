@@ -436,13 +436,11 @@ int main(int argc, char** argv) {
               Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
             } 
 
-            // printf("i=%d and j=%d\n",iloop,jloop);
-
             absinput_after_blur(iloop,jloop,af::span)+=af::sum(Z_add(af::span,jloop,iloop),0);
 
-            
           
           }
+          printf("i=%d\n",iloop);
         } 
         
 
