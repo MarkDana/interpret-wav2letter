@@ -426,7 +426,7 @@ int main(int argc, char** argv) {
               // printf("m_p_j dim is %d x %d\n",tmp1,tmp2);
 
               //这里只看 abs(ploop-iloop)<m_p_j 的部分
-              auto condition1 = (abs(ploop-iloop)<m_p_j).as(f32);
+              auto condition1 = (af::abs(ploop-iloop)<m_p_j).as(f32);
               auto condition2 = (ploop == iloop).as(f32);
 
               int tmp1=condition1.dims()[0];
