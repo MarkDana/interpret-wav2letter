@@ -610,10 +610,13 @@ int main(int argc, char** argv) {
 
         printf("xGrad okok\n");
 
+        auto tmpcout = mGrad.dims();
+        printf("mGrad is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+
         for (size_t igrad=0; igrad<K; ++igrad){
 
-          auto tmpcout = mGrad(igrad,af::span,af::span,af::span).dims();
-          printf("tmpcout is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
+          tmpcout = mGrad(igrad,af::span,af::span,af::span).dims();
+          printf("mGrad is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
           tmpcout = xGrad.dims();
           printf("xGrad is %dx%dx%dx%n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
