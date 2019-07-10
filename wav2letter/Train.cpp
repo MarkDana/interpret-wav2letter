@@ -415,11 +415,11 @@ int main(int argc, char** argv) {
             absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
             printf("%d\t%d\n",iloop,jloop);
 
-            auto m_p_j=m(ploop,jloop,0,0);
-            auto sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
-            auto sum_mpj_partial_to_mpj=2*m_p_j;
-
+            
             gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
+              auto m_p_j=m(ploop,jloop,0,0);
+              auto sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
+              auto sum_mpj_partial_to_mpj=2*m_p_j;
               auto Z_add_pji = absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
               auto Z_grad_pji = absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
               Z_add(ploop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
@@ -429,6 +429,10 @@ int main(int argc, char** argv) {
 
             //中心有不同
             absinput_after_blur(iloop,jloop,af::span)-=Z_add(iloop,jloop,iloop);
+
+            auto m_p_j=m(iloop,jloop,0,0);
+            auto sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
+            auto sum_mpj_partial_to_mpj=2*m_p_j;
             auto Z_add_pji = absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j;
             auto Z_grad_pji = absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j);
             Z_add(iloop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
