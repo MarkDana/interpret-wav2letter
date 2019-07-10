@@ -413,7 +413,6 @@ int main(int argc, char** argv) {
         gfor (af::seq iloop, K){
           gfor (af::seq jloop, T){
             absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
-            printf("%d\t%d\n",iloop,jloop);
 
             
             // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
@@ -424,6 +423,7 @@ int main(int argc, char** argv) {
 
               auto Z_add_pji = (abs(ploop-iloop)<m_p_j)*absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
               auto Z_grad_pji = (abs(ploop-iloop)<m_p_j)*absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
+              
               Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
               Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
               absinput_after_blur(iloop,jloop,af::span) += Z_add(ploop,jloop,iloop);
@@ -441,52 +441,14 @@ int main(int argc, char** argv) {
             Z_add(iloop,jloop,iloop,af::span) = Z_add_pji,noiseDims[3];
             Z_grad(iloop,jloop,iloop,af::span) = Z_grad_pji,noiseDims[3];
             absinput_after_blur(iloop,jloop,af::span)+=Z_add(iloop,jloop,iloop);
+
+            int Ktmp=absinput_after_blur.dims()[0];
+            int Ttmp=absinput_after_blur.dims()[1];
+            printf("absinput_after_blur dim is %d x %d\n",Ktmp,Ttmp);
           
           }
         } 
-        //上面这种写法太慢了，想办法并行优化
-
-        // for (size_t iloop = 0; iloop < K; ++iloop){
-        //   for (size_t jloop = 0; jloop < T; ++jloop){
-        //     absinput_after_blur(i,j,af::span,af::span) = absinput(i,j,af::span,af::span);
-
-        //     auto m_j = m(af::span,j,af::span,af::span);
-        //     auto sum_m_j = af::floor(m_j)*(2*m_j-af::floor(m_j)-1)+m_j;
-        //     auto sum_mj_partial_to_mj = 2*m_j;
-
-        //     //写到了这里
-
-        //     for (size_t p = 0; p < K; p=p+1){
-
-        //       printf("%d\t%d\t%d\n",i,j,p);
-
-        //       if (abs(i-p) >= m(p,j,0,0).scalar<float>()){
-        //         Z_add(p,j,i,af::span) = af::constant(0,noiseDims[3]);
-        //         Z_grad(p,j,i,af::span) = af::constant(0,noiseDims[3]);
-        //       }
-        //       else{
-
-        //         float m_p_j=m(p,j,0,0).scalar<float>();
-        //         float sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
-        //         float sum_mpj_partial_to_mpj=2*m_p_j;
-
-        //         if (i!=p){
-        //           float Z_add_pji = absinput(p,j,0,0).scalar<float>()*(m_p_j-abs(i-p))/sum_m_p_j;
-        //           float Z_grad_pji = absinput(p,j,0,0).scalar<float>()*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(i-p)))/(sum_m_p_j*sum_m_p_j);
-        //           Z_add(p,j,i,af::span) = af::constant(Z_add_pji,noiseDims[3]);
-        //           Z_grad(p,j,i,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
-                
-        //         }else{
-        //           float Z_add_pji = absinput(p,j,0,0).scalar<float>()*(m_p_j-sum_m_p_j)/sum_m_p_j;
-        //           float Z_grad_pji = absinput(p,j,0,0).scalar<float>()*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j);
-        //           Z_add(p,j,i,af::span) = af::constant(Z_add_pji,noiseDims[3]);
-        //           Z_grad(p,j,i,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
-        //         }
-        //       } 
-        //       absinput_after_blur(i,j,af::span)+=Z_add(p,j,i);
-        //     }
-        //   } 
-        // }
+        
 
         //Notice:here prefft is 2K*T
         //Notice:but maskMusic is K*T, and angle remains still
@@ -506,9 +468,7 @@ int main(int argc, char** argv) {
 
 
 
-        // int Ktmp=rawinput.dims()[0];
-        // int Ttmp=rawinput.dims()[1];
-        // printf("rawinput dim is %d x %d\n",Ktmp,Ttmp);
+        
 
         //T x K x FLAGS_channels x batchSz
         // af::array trInput = af::transpose(absinput);
