@@ -417,7 +417,7 @@ int main(int argc, char** argv) {
             
             // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
             gfor (af::seq ploop, K){
-              auto m_p_j=m(ploop,jloop,0,0); // dim of K*1*1*1
+              auto m_p_j=af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
               auto m_floor = af::moddims(af::floor(m_p_j),m_p_j.dims()); // dim of K*1*1*1
 
               auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j;
