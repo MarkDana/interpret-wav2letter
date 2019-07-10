@@ -430,7 +430,7 @@ int main(int argc, char** argv) {
               auto tmp=(m_floor*(2*m_p_j-m_floor-1)).dims();
               printf("m_floor*(2*m_p_j-m_floor-1) dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
-              tmp = (2*m_p_j-m_floor - af::constant(1,m_p_j.dims()).dims());
+              tmp = (2*m_p_j - m_floor - af::constant(1,m_p_j.dims())).dims();
               printf("2*m_p_j-m_floor-1 dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
               tmp = (m_p_j).dims();
@@ -445,7 +445,7 @@ int main(int argc, char** argv) {
               tmp = (m_p_j-1).dims();
               printf("m_p_j-1 dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
-              tmp = (m_p_j- af::constant(1,m_p_j.dims()).dims());
+              tmp = (m_p_j- af::constant(1,m_p_j.dims())).dims();
               printf("2*m_p_j dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
 
