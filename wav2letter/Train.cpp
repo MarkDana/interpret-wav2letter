@@ -10,6 +10,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "cstdio"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/types/unordered_map.hpp>
@@ -113,10 +114,14 @@ int main(int argc, char** argv) {
 
   bool isMaster = (worldRank == 0);
 
+
+
   LOG_MASTER(INFO) << "Gflags after parsing \n" << serializeGflags("; ");
+
 
   LOG_MASTER(INFO) << "Experiment path: " << runPath;
   LOG_MASTER(INFO) << "Experiment runidx: " << runIdx;
+
 
   std::unordered_map<std::string, std::string> config = {
       {kProgramName, exec},
@@ -154,6 +159,9 @@ int main(int argc, char** argv) {
   }
   LOG_MASTER(INFO) << "[Network Optimizer] " << netoptim->prettyString();
   LOG_MASTER(INFO) << "[Criterion Optimizer] " << critoptim->prettyString();
+
+  printf("ok runpath is %s\n",runPath.c_str());
+  //07-10-上午：这行可以正常输出，但LOG只能打到119行，why
 
   /* ===================== Meters ===================== */
   
@@ -219,6 +227,7 @@ int main(int argc, char** argv) {
       std::ofstream mloss_grad_mean_file("/root/w2l/CTC/mloss_grad_mean.txt", std::ios::out);
       std::ofstream mloss_grad_var_file("/root/w2l/CTC/mloss_grad_var.txt", std::ios::out);
 
+
       
       
       //std::vector<float> firGradnorm(numNoise);
@@ -229,7 +238,11 @@ int main(int argc, char** argv) {
       //std::ofstream totGradnormFile("/root/w2l/aboutM/totGradnorm.txt", std::ios::out);
 
       af::dim4 noiseDims = pre_sample[kFftIdx].dims(); //2K x T x FLAGS_channels x batchSz
-      auto m = af::constant(0.1, noiseDims);
+      int T = noiseDims[1];
+      int K = noiseDims[0]/2;
+      auto m = af::constant(0.1, af::dim4(K, T, noiseDims[2], noiseDims[3])); // Now m is K x T x FLAGS_channels x batchSz
+
+      // auto m = af::constant(0.1, noiseDims);
       //auto m = af::constant(0.1,noiseDims);
       //auto m=fl::normal(noiseDims,0.002,0.1).array();
       // float mylr = 0.001;
@@ -257,6 +270,11 @@ int main(int argc, char** argv) {
         preinput << af::toString("pre_fft values:",pre_sample[kFftIdx]);
         preinput.close();
       }
+      //Notice:here prefft is 2K*T
+      //Notice:but maskMusic is K*T
+
+
+
       //using network to generate preOutput 
       auto prefinalinput=pre_sample[kInputIdx];
       const float inputmean=af::mean<float>(pre_sample[kInputIdx]);
@@ -327,14 +345,35 @@ int main(int argc, char** argv) {
       ntwrk->train();
       crit->train();
 
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////
+      auto rawinput = pre_sample[kFftIdx];
+      af::array absinput(af::dim4(K, T, noiseDims[2], noiseDims[3]));
+      auto Z_add = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_add is Z
+      auto Z_grad = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_grad is partial(Z_pji)/partial(m_p_j)
+      af::array absinput_after_blur(af::dim4(K, T, noiseDims[2], noiseDims[3]));
+
+      for (size_t j = 0; j < 2*K; j=j+2)
+        {
+            auto fir = rawinput(j, af::span, af::span, af::span);
+            //LOG(INFO) << "fir row(i) dims is :" << fir.array().dims() << " " << af::toString("row(i) first value is ", fir.array()(0));
+            auto sec = rawinput(j+1, af::span, af::span, af::span);
+            //note shallow copy in fl::Variable
+            auto temp = af::sqrt(fir * fir + sec * sec);
+            absinput(j/2, af::span, af::span, af::span) =  temp;
+        }
+
+
       for (int i = 0; i < numNoise; i++) {
         printf("now training m%d\n",i);
+
+
         LOG(INFO) << "=================noise sample " << i << "==================";
         // meters
         af::sync();
         
-        if (af::anyTrue<bool>(af::isNaN(pre_sample[kInputIdx])) ||
-            af::anyTrue<bool>(af::isNaN(pre_sample[kTargetIdx]))) {
+        if (af::anyTrue<bool>(af::isNaN(rawinput)) ||
+            af::anyTrue<bool>(af::isNaN(rawinput))) {
           LOG(FATAL) << "pre_sample has NaN values";
         }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -352,36 +391,71 @@ int main(int argc, char** argv) {
               epsfile.close();
      }
   }
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-  auto rawinput = pre_sample[kFftIdx] + m * epsilon;
+
+
+
   //LOG(INFO)<<af::toString("epsilon 6 values:", epsilon(af::seq(6)));
   //LOG(INFO)<<af::toString("m 6 values:", m(af::seq(6)));
   //LOG(INFO)<<af::toString("rawinput 6 values:",rawinput(af::seq(6)));
         
-
-        int T = noiseDims[1];
-        int K = noiseDims[0]/2;
-        af::array absinput(af::dim4(K, T, noiseDims[2], noiseDims[3]));
-        af::array backinput(noiseDims);
-        
         
         //LOG(INFO) << "m_epsilon mean :" << af::mean<float>(m*epsilon);
         //LOG(INFO) << "m_epsilon stdev :" << af::stdev<float>(m*epsilon);
+      
+
+        for (size_t iloop = 0; iloop < K; ++iloop){
+          for (size_t jloop = 0; jloop < T; ++jloop){
+            absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
+
+            
+            // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
+            gfor (af::seq ploop, K){
+              auto m_p_j = af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
+              auto m_floor = af::floor(m_p_j); // dim of K*1*1*1
+
+              auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j; // dim of K*1*1*1
+              auto sum_mpj_partial_to_mpj=2*m_p_j; // dim of K*1*1*1
+
+              //这里只看 abs(ploop-iloop)<m_p_j 的部分
+              auto condition1 = (af::abs(ploop-iloop)<m_p_j);
+              auto condition2 = ((ploop - iloop)==0);
+
+
+              auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(m_p_j-sum_m_p_j)/sum_m_p_j));
+              auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
+              
+
+              Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
+              Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
+            } 
+
+            absinput_after_blur(iloop,jloop,af::span)+=af::sum(Z_add(af::span,jloop,iloop),0);
+          }
+          printf("i=%d\n",iloop);
+        } 
         
-        for (size_t j = 0; j < 2*K; j=j+2)
+
+        //Notice:here prefft is 2K*T
+        //Notice:but maskMusic is K*T, and angle remains still
+        if(i%1000 == 0)
         {
-            auto fir = rawinput(j, af::span, af::span, af::span);
-            //LOG(INFO) << "fir row(i) dims is :" << fir.array().dims() << " " << af::toString("row(i) first value is ", fir.array()(0));
-            auto sec = rawinput(j+1, af::span, af::span, af::span);
-            //note shallow copy in fl::Variable
-            auto temp = af::sqrt(fir * fir + sec * sec);
-            absinput(j/2, af::span, af::span, af::span) =  temp;
-            backinput(j, af::span, af::span, af::span) = temp;
-            backinput(j+1, af::span, af::span, af::span) = temp;
+            char outdir[80];
+
+            sprintf(outdir, "/root/w2l/CTC/music_mask_%d.txt", i);
+        
+            std::ofstream fft_mask_now(outdir);
+            if(fft_mask_now.is_open())
+            {
+               fft_mask_now<<af::toString("mask music is:", absinput_after_blur);
+               fft_mask_now.close();
+            }
         }
 
         //T x K x FLAGS_channels x batchSz
-        af::array trInput = af::transpose(absinput);
+        // af::array trInput = af::transpose(absinput);
+
+        af::array trInput = af::transpose(absinput_after_blur);
+        printf("trInput okok\n");
 
         // dft kInputIdx not normalized
         //LOG(INFO) << "dft abs mean :" << af::mean<float>(absinput);
@@ -453,27 +527,16 @@ int main(int argc, char** argv) {
          nowOutFile_0.close();
       }
   }
-
-  if(i%1000 == 0)
-  {
-      char outdir[80];
-
-      sprintf(outdir, "/root/w2l/CTC/music_mask_%d.txt", i);
-  
-      std::ofstream fft_mask_now(outdir);
-      if(fft_mask_now.is_open())
-      {
-         fft_mask_now<<af::toString("mask music is:", rawinput);
-         fft_mask_now.close();
-      }
-  }
         
         //LOG(INFO) << "network forward output dims is "<< output.array().dims();
         //LOG(INFO) << "load rawEmission preOutput dims is :" << preOutput.array().dims() ;
+
+  printf("backward okok\n");
+
   float lambda = 0.1;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
-        auto m_L2 = af::norm(m); //double
+        auto m_entropy = af::sum<float> (af::log(m)); 
         auto myloss = f_L2 * f_L2;
         float m_mean=af::mean<float>(m);
         float m_var=af::var<float>(m);
@@ -481,15 +544,15 @@ int main(int argc, char** argv) {
         //auto firloss = fl::MeanSquaredError();
         //auto myloss = firloss(output, preOutput);
 
-        float totloss = myloss.scalar<float>() - lambda * std::log(m_L2 * m_L2);
+        float totloss = myloss.scalar<float>() - lambda * m_entropy;
 
         LOG(INFO) << "f star norm is:" << af::norm(preOutput.array());
         LOG(INFO) << "f now norm is:" << af::norm(output.array());
         LOG(INFO) << "loss - f difference is :" << myloss.scalar<float>();
-        LOG(INFO) << "loss - logm is :" << std::log(m_L2 * m_L2);
+        LOG(INFO) << "loss - logm is :" << m_entropy;
         LOG(INFO) << "loss is:" << totloss;
         Yfile << totloss << std::endl;
-        Mlossfile << std::log(m_L2 * m_L2) << std::endl;
+        Mlossfile << m_entropy << std::endl;
         Mmeanfile << m_mean<<std::endl;
         Mvarfile << m_var<<std::endl;
         mylossfile << myloss.scalar<float>()<<std::endl;
@@ -540,32 +603,35 @@ int main(int argc, char** argv) {
         auto dsigma2 = af::sum<float>(dy * (trInput - mean) * (-0.5) * std::pow(sigma2, -1.5));
         auto dmu = af::sum<float>(dy * (-1.0/std::pow(sigma2, 0.5))) + af::sum<float>(-2 * (trInput - mean)) * dsigma2 / (T * K);
         auto dx = dy / std::pow(sigma2, 0.5) + dsigma2 * 2 * (trInput - mean) / (T * K) + dmu / (T * K); 
-
         af::array xGrad = af::transpose(dx); // K x T x 1 x 1
-        auto midGrad = epsilon * epsilon * m + epsilon * pre_sample[kFftIdx];
-        auto xGradm = midGrad / backinput; //2K x T x 1 x 1
-        af::array mGrad = af::constant(0, noiseDims);
 
-        auto tmp_cout = xGradm.dims();
-        printf("xGradm is %dx%dx%dx%d\n",tmp_cout[0],tmp_cout[1],tmp_cout[2],tmp_cout[3]);
+        //xGrad is ∂ myloss / ∂ absinput_after_blur;
 
-        tmp_cout = xGrad.dims();
-        printf("xGrad is %dx%dx%dx%d\n",tmp_cout[0],tmp_cout[1],tmp_cout[2],tmp_cout[3]);
+        printf("xGrad okok\n");
 
-        for(size_t j=0; j< 2*K; j=j+2) {
-          mGrad(j, af::span, af::span, af::span) = xGrad(j/2,af::span,af::span,af::span) * xGradm(j,af::span,af::span,af::span); 
-          mGrad(j+1, af::span, af::span, af::span) = xGrad(j/2,af::span,af::span,af::span) * xGradm(j+1, af::span,af::span,af::span);
+        af::array xGradm = af::constant(0, af::dim4(K, T, T, K));
+        for (size_t i = 0; i < K; i=i+1){
+          for (size_t j = 0; j < T; j=j+1){
+            for (size_t p = 0; p < K; p=p+1){
+              xGradm(i,j,j,p)=Z_grad(p,j,i,0);
+            }
+          }
         }
-  
-        auto mGrad_aboutm_L2 = 2 * m / (m_L2 * m_L2);
+
+        printf("xGradm okok\n");
+          
+
+        auto mGrad = xGrad * xGradm;
+
+        auto mGrad_aboutm_entropy = 1 / m ;
 
         myloss_grad_mean_file << af::mean<float>(mGrad)<<std::endl;
         myloss_grad_var_file << af::var<float>(mGrad)<<std::endl;
-        mloss_grad_mean_file << af::mean<float>(mGrad_aboutm_L2)<<std::endl;
-        mloss_grad_var_file << af::var<float>(mGrad_aboutm_L2)<<std::endl;
+        mloss_grad_mean_file << af::mean<float>(mGrad_aboutm_entropy)<<std::endl;
+        mloss_grad_var_file << af::var<float>(mGrad_aboutm_entropy)<<std::endl;
 
 
-        mGrad = mGrad - lambda * mGrad_aboutm_L2;
+        mGrad = mGrad - lambda * mGrad_aboutm_entropy;
 
         m = m - mylr * mGrad;
         
@@ -581,7 +647,9 @@ int main(int argc, char** argv) {
 
 
       af::sync();
+
       if (FLAGS_reportiters == 0) {
+      // if (0 == 0) {
         //runValAndSaveModel(curEpoch, netopt->getLr(), critopt->getLr());
         //std::string mpath = "/root/w2l/aboutM/last_m.bin";
         //W2lSerializer::save(mpath, m);
@@ -611,3 +679,4 @@ int main(int argc, char** argv) {
   LOG_MASTER(INFO) << "Finished my training";
   return 0;
 }
+
