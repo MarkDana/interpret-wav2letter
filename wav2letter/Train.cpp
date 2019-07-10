@@ -415,30 +415,28 @@ int main(int argc, char** argv) {
             absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
             printf("%d\t%d\n",iloop,jloop);
 
-            float m_p_j=m(ploop,jloop,0,0).scalar<float>();
-            float sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
-            float sum_mpj_partial_to_mpj=2*m_p_j;
+            auto m_p_j=m(ploop,jloop,0,0);
+            auto sum_m_p_j=int(m_p_j)*(2*m_p_j-int(m_p_j)-1)+m_p_j;
+            auto sum_mpj_partial_to_mpj=2*m_p_j;
 
             gfor (af::seq ploop, max(iloop-int(m_p_j),0), min(iloop+int(m_p_j),K-1)){
+              auto Z_add_pji = absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
+              auto Z_grad_pji = absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
+              Z_add(ploop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
+              Z_grad(ploop,jloop,iloop,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
+              absinput_after_blur(iloop,jloop,af::span)+=Z_add(ploop,jloop,iloop);
+            } 
 
-                  float Z_add_pji = absinput(ploop,jloop,0,0).scalar<float>()*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
-                  float Z_grad_pji = absinput(ploop,jloop,0,0).scalar<float>()*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
-                  Z_add(ploop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
-                  Z_grad(ploop,jloop,iloop,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
-                  absinput_after_blur(iloop,jloop,af::span)+=Z_add(ploop,jloop,iloop);
-                } 
-
-            //中心维度有不同
+            //中心有不同
             absinput_after_blur(iloop,jloop,af::span)-=Z_add(iloop,jloop,iloop);
-            float Z_add_pji = absinput(iloop,jloop,0,0).scalar<float>()*(m_p_j-sum_m_p_j)/sum_m_p_j;
-            float Z_grad_pji = absinput(iloop,jloop,0,0).scalar<float>()*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j);
+            auto Z_add_pji = absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j;
+            auto Z_grad_pji = absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j);
             Z_add(iloop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
             Z_grad(iloop,jloop,iloop,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
             absinput_after_blur(iloop,jloop,af::span)+=Z_add(iloop,jloop,iloop);
           
-            }
-          } 
-        }
+          }
+        } 
         //上面这种写法太慢了，想办法并行优化
 
         // for (size_t iloop = 0; iloop < K; ++iloop){
