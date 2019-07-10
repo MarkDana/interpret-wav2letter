@@ -410,12 +410,12 @@ int main(int argc, char** argv) {
             backinput(j+1, af::span, af::span, af::span) = temp;
         }
 
-        gfor (seq iloop, K){
-          gfor (seq jloop, T){
+        gfor (af::seq iloop, K){
+          gfor (af::seq jloop, T){
             absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
             printf("%d\t%d\n",iloop,jloop);
 
-            gfor (seq ploop, K){
+            gfor (af::seq ploop, K){
 
 
               if (abs(iloop-ploop) < m(ploop,jloop,0,0).scalar<float>()){
