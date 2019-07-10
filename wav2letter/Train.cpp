@@ -421,9 +421,18 @@ int main(int argc, char** argv) {
               auto sum_m_p_j=af::floor(m_p_j)*(2*m_p_j-af::floor(m_p_j)-1)+m_p_j;
               auto sum_mpj_partial_to_mpj=2*m_p_j;
 
+              int tmp1=m_p_j.dims()[0];
+              int tmp2=m_p_j.dims()[1];
+              printf("m_p_j dim is %d x %d\n",tmp1,tmp2);
+
+              //这里只看 abs(ploop-iloop)<m_p_j 的部分
               auto Z_add_pji = (abs(ploop-iloop)<m_p_j).as(f32)*absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
               auto Z_grad_pji = (abs(ploop-iloop)<m_p_j).as(f32)*absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
               
+              tmp1=Z_add_pji.dims()[0];
+              tmp2=Z_add_pji.dims()[1];
+              printf("Z_add_pji dim is %d x %d\n",tmp1,tmp2);
+
               Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
               Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
               absinput_after_blur(iloop,jloop,af::span) += Z_add(ploop,jloop,iloop);
@@ -442,9 +451,7 @@ int main(int argc, char** argv) {
             Z_grad(iloop,jloop,iloop,af::span) = Z_grad_pji,noiseDims[3];
             absinput_after_blur(iloop,jloop,af::span)+=Z_add(iloop,jloop,iloop);
 
-            int Ktmp=absinput_after_blur.dims()[0];
-            int Ttmp=absinput_after_blur.dims()[1];
-            printf("absinput_after_blur dim is %d x %d\n",Ktmp,Ttmp);
+            
           
           }
         } 
