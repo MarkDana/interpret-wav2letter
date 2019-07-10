@@ -424,8 +424,8 @@ int main(int argc, char** argv) {
 
               auto Z_add_pji = (abs(ploop-iloop)<m_p_j)*absinput(ploop,jloop,0,0)*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
               auto Z_grad_pji = (abs(ploop-iloop)<m_p_j)*absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
-              Z_add(ploop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
-              Z_grad(ploop,jloop,iloop,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
+              Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
+              Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
               absinput_after_blur(iloop,jloop,af::span) += Z_add(ploop,jloop,iloop);
               
             } 
@@ -438,8 +438,8 @@ int main(int argc, char** argv) {
             auto sum_mpj_partial_to_mpj=2*m_p_j;
             auto Z_add_pji = absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j;
             auto Z_grad_pji = absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j);
-            Z_add(iloop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
-            Z_grad(iloop,jloop,iloop,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
+            Z_add(iloop,jloop,iloop,af::span) = Z_add_pji,noiseDims[3];
+            Z_grad(iloop,jloop,iloop,af::span) = Z_grad_pji,noiseDims[3];
             absinput_after_blur(iloop,jloop,af::span)+=Z_add(iloop,jloop,iloop);
           
           }
