@@ -420,21 +420,22 @@ int main(int argc, char** argv) {
             float sum_mpj_partial_to_mpj=2*m_p_j;
 
             gfor (af::seq ploop, max(iloop-int(m_p_j),0), min(iloop+int(m_p_j),K-1)){
-                
 
-                if (iloop!=ploop){
                   float Z_add_pji = absinput(ploop,jloop,0,0).scalar<float>()*(m_p_j-abs(iloop-ploop))/sum_m_p_j;
                   float Z_grad_pji = absinput(ploop,jloop,0,0).scalar<float>()*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j);
                   Z_add(ploop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
                   Z_grad(ploop,jloop,iloop,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
-                
-                }else{
-                  float Z_add_pji = absinput(ploop,jloop,0,0).scalar<float>()*(m_p_j-sum_m_p_j)/sum_m_p_j;
-                  float Z_grad_pji = absinput(ploop,jloop,0,0).scalar<float>()*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j);
-                  Z_add(ploop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
-                  Z_grad(ploop,jloop,iloop,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
+                  absinput_after_blur(iloop,jloop,af::span)+=Z_add(ploop,jloop,iloop);
                 } 
-              absinput_after_blur(iloop,jloop,af::span)+=Z_add(ploop,jloop,iloop);
+
+            //中心维度有不同
+            absinput_after_blur(iloop,jloop,af::span)-=Z_add(iloop,jloop,iloop);
+            float Z_add_pji = absinput(iloop,jloop,0,0).scalar<float>()*(m_p_j-sum_m_p_j)/sum_m_p_j;
+            float Z_grad_pji = absinput(iloop,jloop,0,0).scalar<float>()*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j);
+            Z_add(iloop,jloop,iloop,af::span) = af::constant(Z_add_pji,noiseDims[3]);
+            Z_grad(iloop,jloop,iloop,af::span) = af::constant(Z_grad_pji,noiseDims[3]);
+            absinput_after_blur(iloop,jloop,af::span)+=Z_add(iloop,jloop,iloop);
+          
             }
           } 
         }
