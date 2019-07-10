@@ -417,7 +417,7 @@ int main(int argc, char** argv) {
             
             // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
             gfor (af::seq ploop, K){
-              auto m_p_j = af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
+              auto m_p_j = af::moddims(m(ploop,jloop,af::span,af::span),K); // dim of K*1*1*1
               auto m_floor = af::floor(m_p_j); // dim of K*1*1*1
 
               auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j; // dim of K*1*1*1
@@ -428,15 +428,15 @@ int main(int argc, char** argv) {
               auto condition2 = ((ploop - iloop)==0);
 
 
-              auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*(m_p_j-sum_m_p_j)/sum_m_p_j));
-              auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,0,0)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (absinput(iloop,jloop,0,0)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
+              auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,af::span,af::span)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (absinput(iloop,jloop,af::span,af::span)*(m_p_j-sum_m_p_j)/sum_m_p_j));
+              auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (absinput(ploop,jloop,af::span,af::span)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (absinput(iloop,jloop,af::span,af::span)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
               
               auto tmp=(Z_add_pji).dims();
               printf("Z_add_pji dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
               tmp = (Z_grad_pji).dims();
               printf("Z_grad_pji dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-              
+
 
               Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
               Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
