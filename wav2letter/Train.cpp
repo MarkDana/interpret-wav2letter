@@ -417,8 +417,8 @@ int main(int argc, char** argv) {
             
             // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
             gfor (af::seq ploop, K){
-              auto m_p_j=af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
-              auto m_floor = af::moddims(af::floor(m_p_j),m_p_j.dims()); // dim of K*1*1*1
+              auto m_p_j = af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
+              auto m_floor = af::floor(m_p_j); // dim of K*1*1*1
 
               auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j;
               auto sum_mpj_partial_to_mpj=2*m_p_j;
@@ -427,30 +427,11 @@ int main(int argc, char** argv) {
               auto condition1 = (af::abs(ploop-iloop)<m_p_j);
               auto condition2 = ((ploop - iloop)==0);
 
-              auto tmp=(m_floor*(2*m_p_j-m_floor-1)).dims();
-              printf("m_floor*(2*m_p_j-m_floor-1) dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
+              auto tmp=(sum_m_p_j).dims();
+              printf("sum_m_p_j dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
-              tmp = (m).dims();
-              printf("m dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
-              tmp = (2*m_p_j - m_floor - af::constant(1,m_p_j.dims())).dims();
-              printf("2*m_p_j-m_floor-1 dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
-              tmp = (m_p_j).dims();
-              printf("m_p_j dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
-              tmp = (m_floor).dims();
-              printf("m_floor dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
-              tmp = (2*m_p_j).dims();
-              printf("2*m_p_j dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
-              tmp = (m_p_j-1).dims();
-              printf("m_p_j-1 dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
-              tmp = (m_p_j- af::constant(1,m_p_j.dims())).dims();
-              printf("m_p_j- af::constant(1,m_p_j.dims()) dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
-
+              tmp = (sum_mpj_partial_to_mpj).dims();
+              printf("sum_mpj_partial_to_mpj dim is %d x %d x %d x %d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
 
 
 
