@@ -434,12 +434,11 @@ int main(int argc, char** argv) {
 
               Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
               Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
-              
             } 
 
-            printf("i=%d and j=%d\n",iloop,jloop);
+            // printf("i=%d and j=%d\n",iloop,jloop);
 
-            for (size_t ploop2 = 0; ploop2 < K; ++ploop2){absinput_after_blur(iloop,jloop,af::span)+=Z_add(ploop2,jloop,iloop);}
+            absinput_after_blur(iloop,jloop,af::span)+=af::sum(Z_add(af::span,jloop,iloop),0);
 
             
           
