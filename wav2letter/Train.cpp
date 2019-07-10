@@ -377,7 +377,10 @@ int main(int argc, char** argv) {
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
 	auto rawinput = pre_sample[kFftIdx];
-  printf("rawinput dim is %d x %d\n",rawinput.dims()[0],rawinput.dims()[1]);
+
+  int Ktmp=rawinput.dims()[0];
+  int Ttmp=rawinput.dims()[1];
+  printf("rawinput dim is %d x %d\n",Ktmp,Ttmp);
 
 
 

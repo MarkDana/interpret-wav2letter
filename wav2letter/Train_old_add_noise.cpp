@@ -328,6 +328,7 @@ int main(int argc, char** argv) {
       crit->train();
 
       for (int i = 0; i < numNoise; i++) {
+        printf("now training m %d \n"，i);
         LOG(INFO) << "=================noise sample " << i << "==================";
         // meters
         af::sync();
