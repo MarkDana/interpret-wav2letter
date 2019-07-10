@@ -345,6 +345,25 @@ int main(int argc, char** argv) {
       ntwrk->train();
       crit->train();
 
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////
+      auto rawinput = pre_sample[kFftIdx];
+      af::array absinput(af::dim4(K, T, noiseDims[2], noiseDims[3]));
+      auto Z_add = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_add is Z
+      auto Z_grad = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_grad is partial(Z_pji)/partial(m_p_j)
+      af::array absinput_after_blur(af::dim4(K, T, noiseDims[2], noiseDims[3]));
+
+      for (size_t j = 0; j < 2*K; j=j+2)
+        {
+            auto fir = rawinput(j, af::span, af::span, af::span);
+            //LOG(INFO) << "fir row(i) dims is :" << fir.array().dims() << " " << af::toString("row(i) first value is ", fir.array()(0));
+            auto sec = rawinput(j+1, af::span, af::span, af::span);
+            //note shallow copy in fl::Variable
+            auto temp = af::sqrt(fir * fir + sec * sec);
+            absinput(j/2, af::span, af::span, af::span) =  temp;
+        }
+
+
       for (int i = 0; i < numNoise; i++) {
         printf("now training m%d\n",i);
 
@@ -353,8 +372,8 @@ int main(int argc, char** argv) {
         // meters
         af::sync();
         
-        if (af::anyTrue<bool>(af::isNaN(pre_sample[kInputIdx])) ||
-            af::anyTrue<bool>(af::isNaN(pre_sample[kTargetIdx]))) {
+        if (af::anyTrue<bool>(af::isNaN(rawinput)) ||
+            af::anyTrue<bool>(af::isNaN(rawinput))) {
           LOG(FATAL) << "pre_sample has NaN values";
         }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -373,42 +392,16 @@ int main(int argc, char** argv) {
      }
   }
 
-  
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-  auto rawinput = pre_sample[kFftIdx];
 
 
   //LOG(INFO)<<af::toString("epsilon 6 values:", epsilon(af::seq(6)));
   //LOG(INFO)<<af::toString("m 6 values:", m(af::seq(6)));
   //LOG(INFO)<<af::toString("rawinput 6 values:",rawinput(af::seq(6)));
         
-
-        
-        af::array absinput(af::dim4(K, T, noiseDims[2], noiseDims[3]));
-        af::array backinput(noiseDims);
-
-        
-
-        auto Z_add = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_add is Z
-        auto Z_grad = af::constant (0,af::dim4(K, T, K, noiseDims[3])); // Z_grad is partial(Z_pji)/partial(m_p_j)
-        af::array absinput_after_blur(af::dim4(K, T, noiseDims[2], noiseDims[3]));
-
         
         //LOG(INFO) << "m_epsilon mean :" << af::mean<float>(m*epsilon);
         //LOG(INFO) << "m_epsilon stdev :" << af::stdev<float>(m*epsilon);
-        
-        for (size_t j = 0; j < 2*K; j=j+2)
-        {
-            auto fir = rawinput(j, af::span, af::span, af::span);
-            //LOG(INFO) << "fir row(i) dims is :" << fir.array().dims() << " " << af::toString("row(i) first value is ", fir.array()(0));
-            auto sec = rawinput(j+1, af::span, af::span, af::span);
-            //note shallow copy in fl::Variable
-            auto temp = af::sqrt(fir * fir + sec * sec);
-            absinput(j/2, af::span, af::span, af::span) =  temp;
-            backinput(j, af::span, af::span, af::span) = temp;
-            backinput(j+1, af::span, af::span, af::span) = temp;
-        }
+      
 
         for (size_t iloop = 0; iloop < K; ++iloop){
           for (size_t jloop = 0; jloop < T; ++jloop){
@@ -437,8 +430,6 @@ int main(int argc, char** argv) {
             } 
 
             absinput_after_blur(iloop,jloop,af::span)+=af::sum(Z_add(af::span,jloop,iloop),0);
-
-          
           }
           printf("i=%d\n",iloop);
         } 
@@ -459,10 +450,6 @@ int main(int argc, char** argv) {
                fft_mask_now.close();
             }
         }
-
-
-
-        
 
         //T x K x FLAGS_channels x batchSz
         // af::array trInput = af::transpose(absinput);
