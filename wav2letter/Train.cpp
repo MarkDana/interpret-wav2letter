@@ -465,10 +465,10 @@ int main(int argc, char** argv) {
         Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
         printf("z okok\n");
 
-        auto tmpcout = af::sum(Z_add,0).dim();
+        auto tmpcout = af::sum(Z_add,0).dims();
         printf("af::sum(Z_add,0) is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
-        tmpcout = af::transpose(af::sum(Z_add,0)).dim();
+        tmpcout = af::transpose(af::sum(Z_add,0)).dims();
         printf("af::transpose(af::sum(Z_add,0)) is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
         absinput_after_blur += af::sum(Z_add,0);
