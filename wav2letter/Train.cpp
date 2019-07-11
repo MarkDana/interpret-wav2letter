@@ -439,26 +439,34 @@ int main(int argc, char** argv) {
 
         af::array MTiled = af::tile(m, af::dim4(1, 1, K));
         af::array absTiled = af::tile(absinput, af::dim4(1, 1, K));
+        printf("tile okok\n");
         af::array iloop = af::range(af::dim4(K, T, K), 2);
         af::array ploop = af::range(af::dim4(K, T, K), 0);
+        printf("loop okok\n");
 
         af::array i_e_p = (iloop == ploop);
         af::array cond  = af::abs(iloop - ploop) < MTiled;
+        printf("condition okok\n");
 
         auto m_floor = af::floor(MTiled);
         auto sum_m_p_j=m_floor*(2*MTiled-m_floor-1) + MTiled;
         auto sum_mpj_partial_to_mpj=2*MTiled;
+        printf("sum_partial okok\n");
 
         af::array f1_1 = absTiled*(MTiled-af::abs(iloop-ploop))/sum_m_p_j; //i!=p, add
         af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
+        printf("f1 okok\n");
 
         af::array f2_1 = absTiled*(MTiled-sum_m_p_j)/sum_m_p_j; //i==p, add
         af::array f2_2 = absTiled*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(MTiled-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
+        printf("f2 okok\n");
 
         Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
         Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
+        printf("z okok\n");
 
         absinput_after_blur += af::transpose(af::sum(Z_add,0));
+        printf("blur okok\n");
 
 
         //Notice:here prefft is 2K*T
