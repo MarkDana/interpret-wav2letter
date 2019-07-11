@@ -546,6 +546,12 @@ int main(int argc, char** argv) {
         auto xGradm = midGrad / backinput; //2K x T x 1 x 1
         af::array mGrad = af::constant(0, noiseDims);
 
+        // auto tmp = xGradm.dim();
+        // printf("xGradm is %dx%dx%dx%d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
+
+        // tmp = xGrad.dim();
+        // printf("xGrad is %dx%dx%dx%d\n",tmp[0],tmp[1],tmp[2],tmp[3]);
+
         for(size_t j=0; j< 2*K; j=j+2) {
           mGrad(j, af::span, af::span, af::span) = xGrad(j/2,af::span,af::span,af::span) * xGradm(j,af::span,af::span,af::span); 
           mGrad(j+1, af::span, af::span, af::span) = xGrad(j/2,af::span,af::span,af::span) * xGradm(j+1, af::span,af::span,af::span);
