@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 
       //the size of trainset is just 1.
       auto pre_sample = trainset->get(0); //make noises for one audio sample
-      int numNoise = 500; //make 1000 noise sub-samples for the audio sample
+      int numNoise = 5000; //make 1000 noise sub-samples for the audio sample
       std::vector<float> Yloss(numNoise); //loss written into Yloss
       std::ofstream Yfile("/root/w2l/CTC/loss.txt", std::ios::out);
       std::ofstream Mmeanfile("/root/w2l/CTC/m_mean.txt", std::ios::out);
@@ -463,7 +463,7 @@ int main(int argc, char** argv) {
 
         //Notice:here prefft is 2K*T
         //Notice:but maskMusic is K*T, and angle remains still
-        if(i%100 == 0)
+        if(i%1000 == 0)
         {
             char outdir[80];
 
@@ -640,9 +640,11 @@ int main(int argc, char** argv) {
         // af::dim4 tmpcout = mGrad.dims();
         // printf("mGrad is %dx%dx%dx%d\n",tmpcout[0],tmpcout[1],tmpcout[2],tmpcout[3]);
 
-        for (size_t igrad=0; igrad<K; ++igrad){
-          mGrad(igrad,af::span,af::span,af::span) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0);
-        }
+        // for (size_t igrad=0; igrad<K; ++igrad){
+        //   mGrad(igrad,af::span,af::span,af::span) = af::sum(xGrad*Z_grad(af::span,af::span,igrad,af::span),0);
+        // }
+
+        mGrad = af::sum(af::tile(xGrad, af::dim4(1, 1, K))*Z_grad,0);
 
         // printf("mGrad okok\n");
 
