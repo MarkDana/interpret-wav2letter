@@ -240,7 +240,7 @@ int main(int argc, char** argv) {
       af::dim4 noiseDims = pre_sample[kFftIdx].dims(); //2K x T x FLAGS_channels x batchSz
       int T = noiseDims[1];
       int K = noiseDims[0]/2;
-      auto m = af::constant(0.1, af::dim4(K, T, noiseDims[2], noiseDims[3])); // Now m is K x T x FLAGS_channels x batchSz
+      auto m = af::constant(1, af::dim4(K, T, noiseDims[2], noiseDims[3])); // Now m is K x T x FLAGS_channels x batchSz
 
       // auto m = af::constant(0.1, noiseDims);
       //auto m = af::constant(0.1,noiseDims);
@@ -559,10 +559,10 @@ int main(int argc, char** argv) {
 
   // printf("backward okok\n");
 
-  float lambda = 0.000001;
+  float lambda = 0.01;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
-        auto m_entropy = af::sum<float> (af::log(m)); 
+        auto m_entropy = af::sum<float> (af::log(af::abs(m))); 
         auto myloss = f_L2 * f_L2;
         float m_mean=af::mean<float>(m);
         float m_var=af::var<float>(m);
