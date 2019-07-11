@@ -453,7 +453,7 @@ int main(int argc, char** argv) {
         af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
 
         af::array f2_1 = absTiled*(MTiled-sum_m_p_j)/sum_m_p_j; //i==p, add
-        af::array f2_2 = absTiled*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
+        af::array f2_2 = absTiled*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(MTiled-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
 
         Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
         Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
