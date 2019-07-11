@@ -365,8 +365,6 @@ int main(int argc, char** argv) {
 
 
       for (int i = 0; i < numNoise; i++) {
-        printf("now training m%d\n",i);
-
 
         LOG(INFO) << "=================noise sample " << i << "==================";
         // meters
@@ -403,37 +401,65 @@ int main(int argc, char** argv) {
         //LOG(INFO) << "m_epsilon stdev :" << af::stdev<float>(m*epsilon);
       
 
-        for (size_t iloop = 0; iloop < K; ++iloop){
-          for (size_t jloop = 0; jloop < T; ++jloop){
-            absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
+        // for (size_t iloop = 0; iloop < K; ++iloop){
+        //   for (size_t jloop = 0; jloop < T; ++jloop){
+        //     absinput_after_blur(iloop,jloop,af::span,af::span) = absinput(iloop,jloop,af::span,af::span);
 
             
-            // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
-            gfor (af::seq ploop, K){
-              auto m_p_j = af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
-              auto m_floor = af::floor(m_p_j); // dim of K*1*1*1
+        //     // gfor (af::seq ploop, std::max(iloop-int(m_p_j),0), std::min(iloop+int(m_p_j),K-1)){
+        //     gfor (af::seq ploop, K){
+        //       auto m_p_j = af::moddims(m(ploop,jloop,0,0),K); // dim of K*1*1*1
+        //       auto m_floor = af::floor(m_p_j); // dim of K*1*1*1
 
-              auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j; // dim of K*1*1*1
-              auto sum_mpj_partial_to_mpj=2*m_p_j; // dim of K*1*1*1
+        //       auto sum_m_p_j=m_floor*(2*m_p_j-m_floor-1) + m_p_j; // dim of K*1*1*1
+        //       auto sum_mpj_partial_to_mpj=2*m_p_j; // dim of K*1*1*1
 
-              //这里只看 abs(ploop-iloop)<m_p_j 的部分
-              auto condition1 = (af::abs(ploop-iloop)<m_p_j);
-              auto condition2 = ((ploop - iloop)==0);
+        //       //这里只看 abs(ploop-iloop)<m_p_j 的部分
+        //       auto condition1 = (af::abs(ploop-iloop)<m_p_j);
+        //       auto condition2 = ((ploop - iloop)==0);
 
 
-              auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(m_p_j-sum_m_p_j)/sum_m_p_j));
-              auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
+        //       auto Z_add_pji = condition1.as(f32) * ((!condition2).as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(m_p_j-af::abs(iloop-ploop))/sum_m_p_j) + condition2.as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(m_p_j-sum_m_p_j)/sum_m_p_j));
+        //       auto Z_grad_pji = condition1.as(f32) * ((!condition2).as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*(sum_m_p_j - sum_mpj_partial_to_mpj*(m_p_j-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j)) + condition2.as(f32) * (af::moddims(absinput(ploop,jloop,0,0),K)*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j)));
               
 
-              Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
-              Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
-            } 
+        //       Z_add(ploop,jloop,iloop,af::span) = Z_add_pji;
+        //       Z_grad(ploop,jloop,iloop,af::span) = Z_grad_pji;
+        //     } 
 
-            absinput_after_blur(iloop,jloop,af::span)+=af::sum(Z_add(af::span,jloop,iloop),0);
-          }
-          // printf("i=%d\n",iloop);
-        } 
-        
+        //     absinput_after_blur(iloop,jloop,af::span)+=af::sum(Z_add(af::span,jloop,iloop),0);
+        //   }
+        //   // printf("i=%d\n",iloop);
+        // } 
+
+  //As above, this method is too slow, use tile to parallel this part, as follows
+
+
+        absinput_after_blur(af::span,af::span,af::span,af::span) = absinput(af::span,af::span,af::span,af::span);
+
+        af::array MTiled = af::tile(m, af::dim4(1, 1, K));
+        af::array absTiled = af::tile(absinput, af::dim4(1, 1, K));
+        af::array iloop = af::range(af::dim4(K, T, K), 2);
+        af::array ploop = af::range(af::dim4(K, T, K), 0);
+
+        af::array i_e_p = (iloop == ploop);
+        af::array cond  = af::abs(iloop - ploop) < MTiled;
+
+        auto m_floor = af::floor(MTiled);
+        auto sum_m_p_j=m_floor*(2*MTiled-m_floor-1) + MTiled;
+        auto sum_mpj_partial_to_mpj=2*MTiled;
+
+        af::array f1_1 = absTiled*(MTiled-af::abs(iloop-ploop))/sum_m_p_j; //i!=p, add
+        af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
+
+        af::array f2_1 = absTiled*(MTiled-sum_m_p_j)/sum_m_p_j; //i==p, add
+        af::array f2_2 = absTiled*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(m_p_j-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
+
+        Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
+        Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
+
+        absinput_after_blur += af::transpose(af::sum(Z_add,0));
+
 
         //Notice:here prefft is 2K*T
         //Notice:but maskMusic is K*T, and angle remains still
@@ -551,6 +577,7 @@ int main(int argc, char** argv) {
         LOG(INFO) << "loss - f difference is :" << myloss.scalar<float>();
         LOG(INFO) << "loss - logm is :" << m_entropy;
         LOG(INFO) << "loss is:" << totloss;
+        printf("now training m%d\ttotloss=%f\n",i,totloss);
         Yfile << totloss << std::endl;
         Mlossfile << m_entropy << std::endl;
         Mmeanfile << m_mean<<std::endl;
@@ -675,4 +702,17 @@ int main(int argc, char** argv) {
   LOG_MASTER(INFO) << "Finished my training";
   return 0;
 }
+
+
+//M shape is K * T * 1 * 1, float
+//abs shape is K * T * 1 * 1, float
+
+//Z1 shape is K * T * K * 1, initially all 0
+//Z2 shape is K * T * K * 1, initially all 0
+
+//intend to assign 3D Z1, Z2 based on 2D M, abs
+//f*_* are functions with args pfloat, returning float
+
+
+
 
