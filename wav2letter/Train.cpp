@@ -453,11 +453,17 @@ int main(int argc, char** argv) {
         af::array f1_1 = absTiled*(MTiled-af::abs(iloop-ploop))/sum_m_p_j; //i!=p, add
         af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
 
-        af::array f2_1 = absTiled*(MTiled-sum_m_p_j)/sum_m_p_j; //i==p, add
-        af::array f2_2 = absTiled*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(MTiled-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
+        // af::array f2_1 = absTiled*(MTiled-sum_m_p_j)/sum_m_p_j; //i==p, add
+        // af::array f2_2 = absTiled*((1-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(MTiled-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
 
-        Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
-        Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
+        Z_add = cond * ((1 - i_e_p) * f1_1);
+        Z_grad = cond * ((1 - i_e_p) * f1_2);
+
+        af::array f2_1 = (-1.0)*af::tile(af::sum(Z_add, 2), af::dim4(1, 1, K)); //i==p, add
+        af::array f2_2 = (-1.0)*af::tile(af::sum(Z_grad, 2), af::dim4(1, 1, K)); //i==p, grad
+
+        Z_add += cond * i_e_p * f2_1;
+        Z_grad += cond * i_e_p * f2_2;
         
         absinput_after_blur += af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1)));
 
@@ -478,32 +484,32 @@ int main(int argc, char** argv) {
             }
         }
 
-        if(i == 0)
-        {
+        // if(i == 0)
+        // {
         
-            // std::ofstream debug_zadd("/root/w2l/CTC/debug_zadd.txt");
-            // if(debug_zadd.is_open())
-            // {
-            //    debug_zadd<<af::toString("debug_zadd is:", Z_add);
-            //    debug_zadd.close();
-            // }
+        //     // std::ofstream debug_zadd("/root/w2l/CTC/debug_zadd.txt");
+        //     // if(debug_zadd.is_open())
+        //     // {
+        //     //    debug_zadd<<af::toString("debug_zadd is:", Z_add);
+        //     //    debug_zadd.close();
+        //     // }
 
-            // std::ofstream debug_zgrad("/root/w2l/CTC/debug_zgrad.txt");
-            // if(debug_zgrad.is_open())
-            // {
-            //    debug_zgrad<<af::toString("debug_zgrad is:", Z_grad);
-            //    debug_zgrad.close();
-            // }
+        //     // std::ofstream debug_zgrad("/root/w2l/CTC/debug_zgrad.txt");
+        //     // if(debug_zgrad.is_open())
+        //     // {
+        //     //    debug_zgrad<<af::toString("debug_zgrad is:", Z_grad);
+        //     //    debug_zgrad.close();
+        //     // }
 
-            std::ofstream realadd("/root/w2l/CTC/realadd.txt");
-            if(realadd.is_open())
-            {
-               realadd<<af::toString("realadd is:", af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1))));
-               realadd.close();
-            }
+        //     std::ofstream realadd("/root/w2l/CTC/realadd.txt");
+        //     if(realadd.is_open())
+        //     {
+        //        realadd<<af::toString("realadd is:", af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1))));
+        //        realadd.close();
+        //     }
 
 
-        }
+        // }
 
 
         fft_mean_file << af::mean<float>(absinput_after_blur) << std::endl;
