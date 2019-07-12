@@ -481,19 +481,19 @@ int main(int argc, char** argv) {
         if(i == 0)
         {
         
-            std::ofstream debug_zadd("/root/w2l/CTC/debug_zadd.txt");
-            if(debug_zadd.is_open())
-            {
-               debug_zadd<<af::toString("debug_zadd is:", Z_add);
-               debug_zadd.close();
-            }
+            // std::ofstream debug_zadd("/root/w2l/CTC/debug_zadd.txt");
+            // if(debug_zadd.is_open())
+            // {
+            //    debug_zadd<<af::toString("debug_zadd is:", Z_add);
+            //    debug_zadd.close();
+            // }
 
-            std::ofstream debug_zgrad("/root/w2l/CTC/debug_zgrad.txt");
-            if(debug_zgrad.is_open())
-            {
-               debug_zgrad<<af::toString("debug_zgrad is:", Z_grad);
-               debug_zgrad.close();
-            }
+            // std::ofstream debug_zgrad("/root/w2l/CTC/debug_zgrad.txt");
+            // if(debug_zgrad.is_open())
+            // {
+            //    debug_zgrad<<af::toString("debug_zgrad is:", Z_grad);
+            //    debug_zgrad.close();
+            // }
 
             std::ofstream realadd("/root/w2l/CTC/realadd.txt");
             if(realadd.is_open())
