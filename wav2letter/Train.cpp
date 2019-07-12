@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 
       //the size of trainset is just 1.
       auto pre_sample = trainset->get(0); //make noises for one audio sample
-      int numNoise = 10000; //make 1000 noise sub-samples for the audio sample
+      int numNoise = 1; //make 1000 noise sub-samples for the audio sample
       std::vector<float> Yloss(numNoise); //loss written into Yloss
       std::ofstream Yfile("/root/w2l/CTC/loss.txt", std::ios::out);
       std::ofstream Mmeanfile("/root/w2l/CTC/m_mean.txt", std::ios::out);
@@ -241,7 +241,7 @@ int main(int argc, char** argv) {
       af::dim4 noiseDims = pre_sample[kFftIdx].dims(); //2K x T x FLAGS_channels x batchSz
       int T = noiseDims[1];
       int K = noiseDims[0]/2;
-      auto m = af::constant(1.0, af::dim4(K, T, noiseDims[2], noiseDims[3])); // Now m is K x T x FLAGS_channels x batchSz
+      auto m = af::constant(5.0, af::dim4(K, T, noiseDims[2], noiseDims[3])); // Now m is K x T x FLAGS_channels x batchSz
 
       // auto m = af::constant(0.1, noiseDims);
       //auto m = af::constant(0.1,noiseDims);
@@ -476,6 +476,33 @@ int main(int argc, char** argv) {
                fft_mask_now<<af::toString("mask music is:", absinput_after_blur);
                fft_mask_now.close();
             }
+        }
+
+        if(i == 0)
+        {
+        
+            std::ofstream debug_zadd("/root/w2l/CTC/debug_zadd.txt");
+            if(debug_zadd.is_open())
+            {
+               debug_zadd<<af::toString("debug_zadd is:", Z_add);
+               debug_zadd.close();
+            }
+
+            std::ofstream debug_zgrad("/root/w2l/CTC/debug_zgrad.txt");
+            if(debug_zgrad.is_open())
+            {
+               debug_zgrad<<af::toString("debug_zgrad is:", Z_grad);
+               debug_zgrad.close();
+            }
+
+            std::ofstream realadd("/root/w2l/CTC/realadd.txt");
+            if(realadd.is_open())
+            {
+               realadd<<af::toString("realadd is:", af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1))));
+               realadd.close();
+            }
+
+
         }
 
 
