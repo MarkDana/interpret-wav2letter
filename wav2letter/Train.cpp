@@ -438,7 +438,7 @@ int main(int argc, char** argv) {
 
         absinput_after_blur(af::span,af::span,af::span,af::span) = absinput(af::span,af::span,af::span,af::span);
 
-        m = af::max(m,0);
+        // m = af::max(m,0);
 
         af::array MTiled = af::tile(m, af::dim4(1, 1, K));
         af::array absTiled = af::tile(absinput, af::dim4(1, 1, K));
