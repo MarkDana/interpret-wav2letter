@@ -454,6 +454,18 @@ int main(int argc, char** argv) {
         auto sum_m_p_j=m_floor*(2*MTiled-m_floor-1) + MTiled;
         auto sum_mpj_partial_to_mpj=2*MTiled;
 
+        af::array f1_1 = absTiled*(MTiled-af::abs(iloop-ploop))/sum_m_p_j; //i!=p, add
+        af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
+
+        Z_add = cond * ((1 - i_e_p) * f1_1);
+        Z_grad = cond * ((1 - i_e_p) * f1_2);
+
+        af::array f2_1 = (-1.0)*af::tile(af::sum(Z_add, 2), af::dim4(1, 1, K)); //i==p, add
+        af::array f2_2 = (-1.0)*af::tile(af::sum(Z_grad, 2), af::dim4(1, 1, K)); //i==p, grad
+
+        Z_add += cond * i_e_p * f2_1;
+        Z_grad += cond * i_e_p * f2_2;
+
 
         absinput_after_blur += af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1)));
 
