@@ -247,7 +247,7 @@ int main(int argc, char** argv) {
       //auto m = af::constant(0.1,noiseDims);
       //auto m=fl::normal(noiseDims,0.002,0.1).array();
       // float mylr = 0.001;
-      float mylr = 10.0;
+      float mylr = 100.0;
 
       //the previous network's output f*
       fl::Variable preOutput; 
@@ -438,7 +438,9 @@ int main(int argc, char** argv) {
 
         absinput_after_blur(af::span,af::span,af::span,af::span) = absinput(af::span,af::span,af::span,af::span);
 
-        m = af::max(m,af::constant(0, m.dims()));
+        // m = af::max(m,af::constant(0, m.dims()));
+
+        m = af::abs(m);
 
         af::array MTiled = af::tile(m, af::dim4(1, 1, K));
         af::array absTiled = af::tile(absinput, af::dim4(1, 1, K));
