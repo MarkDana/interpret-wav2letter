@@ -247,7 +247,7 @@ int main(int argc, char** argv) {
       //auto m = af::constant(0.1,noiseDims);
       //auto m=fl::normal(noiseDims,0.002,0.1).array();
       // float mylr = 0.001;
-      float mylr = 1.0;
+      float mylr = 10.0;
 
       //the previous network's output f*
       fl::Variable preOutput; 
@@ -584,7 +584,7 @@ int main(int argc, char** argv) {
 
   // printf("backward okok\n");
 
-  float lambda = 10000.0;
+       float lambda = 0.01;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
         auto m_entropy = af::sum<float> (af::log(af::abs(m))); 
@@ -595,8 +595,8 @@ int main(int argc, char** argv) {
         //auto firloss = fl::MeanSquaredError();
         //auto myloss = firloss(output, preOutput);
 
-        // float totloss = myloss.scalar<float>() - lambda * m_entropy;
-        float totloss = lambda * myloss.scalar<float>() - m_entropy;
+        float totloss = myloss.scalar<float>() - lambda * m_entropy;
+        // float totloss = lambda * myloss.scalar<float>() - m_entropy;
 
         LOG(INFO) << "f star norm is:" << af::norm(preOutput.array());
         LOG(INFO) << "f now norm is:" << af::norm(output.array());
@@ -682,7 +682,7 @@ int main(int argc, char** argv) {
         mloss_grad_var_file << af::var<float>(mGrad_aboutm_entropy)<<std::endl;
 
 
-        mGrad = lambda * mGrad - mGrad_aboutm_entropy;
+        mGrad =  mGrad - lambda * mGrad_aboutm_entropy;
 
         m = m - mylr * mGrad;
         
