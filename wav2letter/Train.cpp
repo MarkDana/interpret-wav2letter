@@ -475,7 +475,7 @@ int main(int argc, char** argv) {
 
         //Notice:here prefft is 2K*T
         //Notice:but maskMusic is K*T, and angle remains still
-        if(i%10000 == 0)
+        if(i%(numNoise/10-1) == 0)
         {
             char outdir[80];
 
