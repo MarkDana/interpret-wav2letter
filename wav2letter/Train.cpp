@@ -620,7 +620,7 @@ int main(int argc, char** argv) {
         LOG(INFO) << "loss - f difference is :" << myloss.scalar<float>();
         LOG(INFO) << "loss - logm is :" << m_entropy;
         LOG(INFO) << "loss is:" << totloss;
-        printf("now training m%d\ttotloss=%f\n",i,totloss);
+        printf("now training m%d\ttotloss=%f\tmmean=%f\n",i,totloss,m_mean);
         Yfile << totloss << std::endl;
         Mlossfile << m_entropy << std::endl;
         Mmeanfile << m_mean<<std::endl;
