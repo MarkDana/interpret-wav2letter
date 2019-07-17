@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 
       //the size of trainset is just 1.
       auto pre_sample = trainset->get(0); //make noises for one audio sample
-      int numNoise = 50000; //make 1000 noise sub-samples for the audio sample
+      int numNoise = 200000; //make 1000 noise sub-samples for the audio sample
       std::vector<float> Yloss(numNoise); //loss written into Yloss
       std::ofstream Yfile("/root/w2l/CTC/loss.txt", std::ios::out);
       std::ofstream Mmeanfile("/root/w2l/CTC/m_mean.txt", std::ios::out);
@@ -371,9 +371,9 @@ int main(int argc, char** argv) {
         // meters
         af::sync();
 
-        if (i>30000){mylr=100;}
-        else if (i>10000){mylr=500;}
-        else if (i>5000){mylr=1000;}
+        // if (i>30000){mylr=100;}
+        // else if (i>10000){mylr=500;}
+        // else if (i>5000){mylr=1000;}
         
         if (af::anyTrue<bool>(af::isNaN(rawinput)) ||
             af::anyTrue<bool>(af::isNaN(rawinput))) {
@@ -487,6 +487,17 @@ int main(int argc, char** argv) {
             {
                fft_mask_now<<af::toString("mask music is:", absinput_after_blur);
                fft_mask_now.close();
+            }
+
+            char m_dir[80];
+
+            sprintf(m_dir, "/root/w2l/CTC/m_%d.txt", i);
+        
+            std::ofstream m_now(m_dir);
+            if(m_now.is_open())
+            {
+               m_now<<af::toString("m is:", m);
+               m_now.close();
             }
         }
 
