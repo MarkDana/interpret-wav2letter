@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 
       //the size of trainset is just 1.
       auto pre_sample = trainset->get(0); //make noises for one audio sample
-      int numNoise = 50000; //make 1000 noise sub-samples for the audio sample
+      int numNoise = 10000; //make 1000 noise sub-samples for the audio sample
       std::vector<float> Yloss(numNoise); //loss written into Yloss
       std::ofstream Yfile("/root/w2l/CTC/loss.txt", std::ios::out);
       std::ofstream Mmeanfile("/root/w2l/CTC/m_mean.txt", std::ios::out);
@@ -247,7 +247,7 @@ int main(int argc, char** argv) {
       //auto m = af::constant(0.1,noiseDims);
       //auto m=fl::normal(noiseDims,0.002,0.1).array();
       // float mylr = 0.001;
-      float mylr = 500.0;
+      float mylr = 5000.0;
 
       //the previous network's output f*
       fl::Variable preOutput; 
@@ -370,6 +370,9 @@ int main(int argc, char** argv) {
         LOG(INFO) << "=================noise sample " << i << "==================";
         // meters
         af::sync();
+
+        if (i>5000){mylr=500;}
+        else if (i>2000){mylr=1000;}
         
         if (af::anyTrue<bool>(af::isNaN(rawinput)) ||
             af::anyTrue<bool>(af::isNaN(rawinput))) {
@@ -598,7 +601,7 @@ int main(int argc, char** argv) {
 
   // printf("backward okok\n");
 
-       float lambda = 0.001;
+       float lambda = 0.0001;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
         auto m_entropy = af::sum<float> (af::log(af::abs(m))); 
