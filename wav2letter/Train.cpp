@@ -481,11 +481,20 @@ int main(int argc, char** argv) {
         f1_1 *= original_ratio_to_nowsum;
         f1_2 *= original_ratio_to_nowsum;
 
-        af::array f2_1 = absTiled*(original_ratio_to_nowsum*MTiled-sum_m_p_j)/sum_m_p_j; //i==p, add
-        af::array f2_2 = absTiled*((original_ratio_to_nowsum-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(original_ratio_to_nowsum*MTiled-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
+        // af::array f2_1 = absTiled*(original_ratio_to_nowsum*MTiled-sum_m_p_j)/sum_m_p_j; //i==p, add
+        // af::array f2_2 = absTiled*((original_ratio_to_nowsum-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(original_ratio_to_nowsum*MTiled-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
 
-        Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
-        Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
+        // Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
+        // Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
+
+        Z_add = cond * ((1 - i_e_p) * f1_1);
+        Z_grad = cond * ((1 - i_e_p) * f1_2);
+
+        af::array f2_1 = (-1.0)*af::tile(af::sum(Z_add, 2), af::dim4(1, 1, K)); //i==p, add
+        af::array f2_2 = (-1.0)*af::tile(af::sum(Z_grad, 2), af::dim4(1, 1, K)); //i==p, grad
+
+        Z_add += cond * i_e_p * f2_1;
+        Z_grad += cond * i_e_p * f2_2;
                 
         absinput_after_blur += af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1)));
 
