@@ -499,12 +499,49 @@ int main(int argc, char** argv) {
         absinput_after_blur += af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1)));
 
 
-        printf("%s\n\n",af::toString("abs[:,0] is",absTiled(af::span,0)));
-        printf("%s\n\n",af::toString("f1_1[2,0] is",f1_1(2,0)));
-        printf("%s\n\n",af::toString("f2_1[2,0] is",f2_1(2,0)));
-        printf("%s\n\n",af::toString("f1_2[2,0] is",f1_2(2,0)));
-        printf("%s\n\n",af::toString("f2_2[2,0] is",f2_2(2,0)));
-        printf("%s\n\n",af::toString("absinput_after_blur[:,0] is",absinput_after_blur(af::span,0)));
+        
+        std::ofstream debug_abs("/root/w2l/CTC/debug_abs.txt");
+        if(debug_abs.is_open())
+        {
+           debug_abs<<af::toString("abs[:,0] is",absTiled(af::span,0));
+           debug_abs.close();
+        }
+        std::ofstream debug_f1_1("/root/w2l/CTC/debug_f1_1.txt");
+        if(debug_f1_1.is_open())
+        {
+           debug_f1_1<<af::toString("f1_1[2,0] is",f1_1(2,0));
+           debug_f1_1.close();
+        }
+
+        std::ofstream debug_f2_1("/root/w2l/CTC/debug_f2_1.txt");
+        if(debug_f2_1.is_open())
+        {
+           debug_f2_1<<af::toString("f2_1[2,0] is",f2_1(2,0));
+           debug_f2_1.close();
+        }
+
+        std::ofstream debug_f1_2("/root/w2l/CTC/debug_f1_2.txt");
+        if(debug_f1_2.is_open())
+        {
+           debug_f1_2<<af::toString("f1_2[2,0] is",f1_2(2,0));
+           debug_f1_2.close();
+        }
+
+        std::ofstream debug_f2_2("/root/w2l/CTC/debug_f2_2.txt");
+        if(debug_f2_2.is_open())
+        {
+           debug_f2_2<<af::toString("f2_2[2,0] is",f2_2(2,0));
+           debug_f2_2.close();
+        }
+
+        std::ofstream debug_after("/root/w2l/CTC/debug_after.txt");
+        if(debug_after.is_open())
+        {
+           debug_after<<af::toString("after[:,0] is",absinput_after_blur(af::span,0));
+           debug_after.close();
+        }
+
+
 
 
 
