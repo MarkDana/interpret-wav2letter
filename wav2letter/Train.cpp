@@ -500,12 +500,12 @@ int main(int argc, char** argv) {
 
 
         
-        std::ofstream debug_abs("/root/w2l/CTC/debug_abs.txt");
-        if(debug_abs.is_open())
-        {
-           debug_abs<<af::toString("abs[:,0] is",absTiled(af::span,0));
-           debug_abs.close();
-        }
+        // std::ofstream debug_abs("/root/w2l/CTC/debug_abs.txt");
+        // if(debug_abs.is_open())
+        // {
+        //    debug_abs<<af::toString("abs[:,0] is",absTiled(af::span,0));
+        //    debug_abs.close();
+        // }
         std::ofstream debug_f1_1("/root/w2l/CTC/debug_f1_1.txt");
         if(debug_f1_1.is_open())
         {
@@ -534,12 +534,12 @@ int main(int argc, char** argv) {
            debug_f2_2.close();
         }
 
-        std::ofstream debug_after("/root/w2l/CTC/debug_after.txt");
-        if(debug_after.is_open())
-        {
-           debug_after<<af::toString("after[:,0] is",absinput_after_blur(af::span,0));
-           debug_after.close();
-        }
+        // std::ofstream debug_after("/root/w2l/CTC/debug_after.txt");
+        // if(debug_after.is_open())
+        // {
+        //    debug_after<<af::toString("after[:,0] is",absinput_after_blur(af::span,0));
+        //    debug_after.close();
+        // }
 
 
 
