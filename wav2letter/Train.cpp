@@ -477,6 +477,13 @@ int main(int argc, char** argv) {
         af::array f1_1 = absTiled*(MTiled-af::abs(iloop-ploop))/sum_m_p_j; //i!=p, add
         af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-af::abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
 
+        std::ofstream debug_f1_2("/root/w2l/CTC/debug_f1_2.txt");
+        if(debug_f1_2.is_open())
+        {
+           debug_f1_2<<af::toString("f1_2[2,0] is",f1_2(2,0));
+           debug_f1_2.close();
+        }
+        
         af::array original_ratio_to_nowsum = absTiled/af::tile(af::sum(cond * f1_1,2),af::dim4(1, 1, K));
         f1_1 *= original_ratio_to_nowsum;
         f1_2 *= original_ratio_to_nowsum;
@@ -521,12 +528,7 @@ int main(int argc, char** argv) {
            debug_f2_1.close();
         }
 
-        std::ofstream debug_f1_2("/root/w2l/CTC/debug_f1_2.txt");
-        if(debug_f1_2.is_open())
-        {
-           debug_f1_2<<af::toString("f1_2[2,0] is",f1_2(2,0));
-           debug_f1_2.close();
-        }
+        
 
         std::ofstream debug_f2_2("/root/w2l/CTC/debug_f2_2.txt");
         if(debug_f2_2.is_open())
