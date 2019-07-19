@@ -247,7 +247,7 @@ int main(int argc, char** argv) {
       //auto m = af::constant(0.1,noiseDims);
       //auto m=fl::normal(noiseDims,0.002,0.1).array();
       // float mylr = 0.001;
-      float mylr = 1e5;
+      float mylr = 1e4;
 
       //the previous network's output f*
       fl::Variable preOutput; 
@@ -631,7 +631,7 @@ int main(int argc, char** argv) {
 
   // printf("backward okok\n");
 
-       float lambda = 1e-8;
+       float lambda = 1e-10;
         //float lambda = 100;
         auto f_L2 = fl::norm(softmax_add_preOutput - softmax_add_output, {0,1});
         auto m_entropy = af::sum<float> (af::log(af::abs(m))); 
