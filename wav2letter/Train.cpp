@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 
       //the size of trainset is just 1.
       auto pre_sample = trainset->get(0); //make noises for one audio sample
-      int numNoise = 1; //make 1000 noise sub-samples for the audio sample
+      int numNoise = 10000; //make 1000 noise sub-samples for the audio sample
       std::vector<float> Yloss(numNoise); //loss written into Yloss
       std::ofstream Yfile("/root/w2l/CTC/loss.txt", std::ios::out);
       std::ofstream Mmeanfile("/root/w2l/CTC/m_mean.txt", std::ios::out);
@@ -241,13 +241,13 @@ int main(int argc, char** argv) {
       af::dim4 noiseDims = pre_sample[kFftIdx].dims(); //2K x T x FLAGS_channels x batchSz
       int T = noiseDims[1];
       int K = noiseDims[0]/2;
-      auto m = af::constant(5.0, af::dim4(K, T, noiseDims[2], noiseDims[3])); // Now m is K x T x FLAGS_channels x batchSz
+      auto m = af::constant(0.1, af::dim4(K, T, noiseDims[2], noiseDims[3])); // Now m is K x T x FLAGS_channels x batchSz
 
       // auto m = af::constant(0.1, noiseDims);
       //auto m = af::constant(0.1,noiseDims);
       //auto m=fl::normal(noiseDims,0.002,0.1).array();
       // float mylr = 0.001;
-      float mylr = 50000.0;
+      float mylr = 10000.0;
 
       //the previous network's output f*
       fl::Variable preOutput; 
@@ -477,22 +477,11 @@ int main(int argc, char** argv) {
         af::array f1_1 = absTiled*(MTiled-af::abs(iloop-ploop))/sum_m_p_j; //i!=p, add
         af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-af::abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
 
-        std::ofstream debug_f1_2("/root/w2l/CTC/debug_f1_2.txt");
-        if(debug_f1_2.is_open())
-        {
-           debug_f1_2<<af::toString("f1_2[2,0] is",f1_2(2,0));
-           debug_f1_2.close();
-        }
-        
+
         af::array original_ratio_to_nowsum = absTiled/af::tile(af::sum(cond * f1_1,2),af::dim4(1, 1, K));
         f1_1 *= original_ratio_to_nowsum;
         f1_2 *= original_ratio_to_nowsum;
 
-        // af::array f2_1 = absTiled*(original_ratio_to_nowsum*MTiled-sum_m_p_j)/sum_m_p_j; //i==p, add
-        // af::array f2_2 = absTiled*((original_ratio_to_nowsum-sum_mpj_partial_to_mpj)*sum_m_p_j-sum_mpj_partial_to_mpj*(original_ratio_to_nowsum*MTiled-sum_m_p_j))/(sum_m_p_j*sum_m_p_j); //i==p, grad
-
-        // Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
-        // Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
 
         af::array f2_1 = (-1.0)*af::tile(af::sum(cond * ((1 - i_e_p) * f1_1), 2), af::dim4(1, 1, K)); //i==p, add
         af::array f2_2 = (-1.0)*af::tile(af::sum(cond * ((1 - i_e_p) * f1_2), 2), af::dim4(1, 1, K)); //i==p, grad
@@ -501,53 +490,6 @@ int main(int argc, char** argv) {
         Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
                 
         absinput_after_blur += af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1)));
-
-        printf("ok1\n");
-
-
-        af::array debug_abs_arr=absTiled(af::span,0);
-        std::ofstream debug_abs("/root/w2l/CTC/debug_abs.txt");
-        if(debug_abs.is_open())
-        {
-           debug_abs<<af::toString("abs[:,0] is",debug_abs_arr);
-           debug_abs.close();
-        }
-        printf("ok2\n");
-
-        std::ofstream debug_f1_1("/root/w2l/CTC/debug_f1_1.txt");
-        if(debug_f1_1.is_open())
-        {
-           debug_f1_1<<af::toString("f1_1[2,0] is",f1_1(2,0));
-           debug_f1_1.close();
-        }
-
-        std::ofstream debug_f2_1("/root/w2l/CTC/debug_f2_1.txt");
-        if(debug_f2_1.is_open())
-        {
-           debug_f2_1<<af::toString("f2_1[2,0] is",f2_1(2,0));
-           debug_f2_1.close();
-        }
-
-        
-
-        std::ofstream debug_f2_2("/root/w2l/CTC/debug_f2_2.txt");
-        if(debug_f2_2.is_open())
-        {
-           debug_f2_2<<af::toString("f2_2[2,0] is",f2_2(2,0));
-           debug_f2_2.close();
-        }
-
-        std::ofstream debug_after("/root/w2l/CTC/debug_after.txt");
-        if(debug_after.is_open())
-        {
-           debug_after<<af::toString("after[:,0] is",absinput_after_blur(af::span,0));
-           debug_after.close();
-        }
-
-
-
-
-
 
 
         //Notice:here prefft is 2K*T
