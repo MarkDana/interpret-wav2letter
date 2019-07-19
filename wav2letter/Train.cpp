@@ -475,7 +475,7 @@ int main(int argc, char** argv) {
         ////////////////////////////////////////////////////////////////////////////
 
         af::array f1_1 = absTiled*(MTiled-af::abs(iloop-ploop))/sum_m_p_j; //i!=p, add
-        af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
+        af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-af::abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
 
         af::array original_ratio_to_nowsum = absTiled/af::tile(af::sum(cond * f1_1,2),af::dim4(1, 1, K));
         f1_1 *= original_ratio_to_nowsum;
@@ -487,14 +487,11 @@ int main(int argc, char** argv) {
         // Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
         // Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
 
-        Z_add = cond * ((1 - i_e_p) * f1_1);
-        Z_grad = cond * ((1 - i_e_p) * f1_2);
+        af::array f2_1 = (-1.0)*af::tile(af::sum(cond * ((1 - i_e_p) * f1_1), 2), af::dim4(1, 1, K)); //i==p, add
+        af::array f2_2 = (-1.0)*af::tile(af::sum(cond * ((1 - i_e_p) * f1_2), 2), af::dim4(1, 1, K)); //i==p, grad
 
-        af::array f2_1 = (-1.0)*af::tile(af::sum(Z_add, 2), af::dim4(1, 1, K)); //i==p, add
-        af::array f2_2 = (-1.0)*af::tile(af::sum(Z_grad, 2), af::dim4(1, 1, K)); //i==p, grad
-
-        Z_add += cond * i_e_p * f2_1;
-        Z_grad += cond * i_e_p * f2_2;
+        Z_add = cond * (i_e_p * f2_1 + (1 - i_e_p) * f1_1);
+        Z_grad = cond * (i_e_p * f2_2 + (1 - i_e_p) * f1_2);
                 
         absinput_after_blur += af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1)));
 
@@ -510,33 +507,33 @@ int main(int argc, char** argv) {
         }
         printf("ok2\n");
 
-        // std::ofstream debug_f1_1("/root/w2l/CTC/debug_f1_1.txt");
-        // if(debug_f1_1.is_open())
-        // {
-        //    debug_f1_1<<af::toString("f1_1[2,0] is",f1_1(2,0));
-        //    debug_f1_1.close();
-        // }
+        std::ofstream debug_f1_1("/root/w2l/CTC/debug_f1_1.txt");
+        if(debug_f1_1.is_open())
+        {
+           debug_f1_1<<af::toString("f1_1[2,0] is",f1_1(2,0));
+           debug_f1_1.close();
+        }
 
-        // std::ofstream debug_f2_1("/root/w2l/CTC/debug_f2_1.txt");
-        // if(debug_f2_1.is_open())
-        // {
-        //    debug_f2_1<<af::toString("f2_1[2,0] is",f2_1(2,0));
-        //    debug_f2_1.close();
-        // }
+        std::ofstream debug_f2_1("/root/w2l/CTC/debug_f2_1.txt");
+        if(debug_f2_1.is_open())
+        {
+           debug_f2_1<<af::toString("f2_1[2,0] is",f2_1(2,0));
+           debug_f2_1.close();
+        }
 
-        // std::ofstream debug_f1_2("/root/w2l/CTC/debug_f1_2.txt");
-        // if(debug_f1_2.is_open())
-        // {
-        //    debug_f1_2<<af::toString("f1_2[2,0] is",f1_2(2,0));
-        //    debug_f1_2.close();
-        // }
+        std::ofstream debug_f1_2("/root/w2l/CTC/debug_f1_2.txt");
+        if(debug_f1_2.is_open())
+        {
+           debug_f1_2<<af::toString("f1_2[2,0] is",f1_2(2,0));
+           debug_f1_2.close();
+        }
 
-        // std::ofstream debug_f2_2("/root/w2l/CTC/debug_f2_2.txt");
-        // if(debug_f2_2.is_open())
-        // {
-        //    debug_f2_2<<af::toString("f2_2[2,0] is",f2_2(2,0));
-        //    debug_f2_2.close();
-        // }
+        std::ofstream debug_f2_2("/root/w2l/CTC/debug_f2_2.txt");
+        if(debug_f2_2.is_open())
+        {
+           debug_f2_2<<af::toString("f2_2[2,0] is",f2_2(2,0));
+           debug_f2_2.close();
+        }
 
         std::ofstream debug_after("/root/w2l/CTC/debug_after.txt");
         if(debug_after.is_open())
