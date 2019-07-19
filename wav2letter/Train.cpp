@@ -480,7 +480,7 @@ int main(int argc, char** argv) {
 
         af::array original_ratio_to_nowsum = absTiled/af::tile(af::sum(cond * f1_1,2),af::dim4(1, 1, K));
         f1_1 *= original_ratio_to_nowsum;
-        f1_2 *= (original_ratio_to_nowsum*(1-K*f1_1*cond*original_ratio_to_nowsum/absTiled));
+        f1_2 *= (original_ratio_to_nowsum*(1-f1_1*cond*original_ratio_to_nowsum/absTiled));
 
 
         af::array f2_1 = (-1.0)*af::tile(af::sum(cond * ((1 - i_e_p) * f1_1), 2), af::dim4(1, 1, K)); //i==p, add
