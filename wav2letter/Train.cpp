@@ -478,9 +478,9 @@ int main(int argc, char** argv) {
         af::array f1_2 = absTiled*(sum_m_p_j - sum_mpj_partial_to_mpj*(MTiled-af::abs(iloop-ploop)))/(sum_m_p_j*sum_m_p_j); //i!=p, grad
 
 
-        // af::array original_ratio_to_nowsum = absTiled/af::tile(af::sum(cond * f1_1,2),af::dim4(1, 1, K));
-        // f1_1 *= original_ratio_to_nowsum;
-        // f1_2 *= (original_ratio_to_nowsum*(1-f1_1*cond*original_ratio_to_nowsum/absTiled));
+        af::array original_ratio_to_nowsum = absTiled/af::tile(af::sum(cond * f1_1,2),af::dim4(1, 1, K));
+        f1_1 *= original_ratio_to_nowsum;
+        f1_2 *= (original_ratio_to_nowsum*(1-K*f1_1*cond*original_ratio_to_nowsum/absTiled));
 
 
         af::array f2_1 = (-1.0)*af::tile(af::sum(cond * ((1 - i_e_p) * f1_1), 2), af::dim4(1, 1, K)); //i==p, add
