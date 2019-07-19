@@ -498,15 +498,18 @@ int main(int argc, char** argv) {
                 
         absinput_after_blur += af::transpose(af::moddims(af::sum(Z_add,0), af::dim4(T, K, 1, 1)));
 
+        printf("ok1\n");
 
-        
+
+        af::array debug_abs_arr=absTiled(af::span,0);
         std::ofstream debug_abs("/root/w2l/CTC/debug_abs.txt");
         if(debug_abs.is_open())
         {
-           debug_abs<<af::toString("abs[:,0] is",absTiled(af::span,0));
+           debug_abs<<af::toString("abs[:,0] is",debug_abs_arr);
            debug_abs.close();
         }
-        
+        printf("ok2\n");
+
         // std::ofstream debug_f1_1("/root/w2l/CTC/debug_f1_1.txt");
         // if(debug_f1_1.is_open())
         // {
